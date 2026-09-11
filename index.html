@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
   <meta name="theme-color" content="#FFF3E7">
+  <meta name="build-version" content="dev">
   <meta name="color-scheme" content="light">
   <meta name="format-detection" content="telephone=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -71,6 +72,13 @@
   </section>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <div id="update-banner" class="update-banner hidden" role="status" aria-live="polite">
+    <span class="ub-ico">✨</span>
+    <span class="ub-txt">有新版本可用</span>
+    <button id="ub-refresh" class="ub-btn" data-act="swrefresh">刷新</button>
+    <button id="ub-close" class="ub-x" data-act="swclose" aria-label="忽略更新">×</button>
+  </div>
 
   <script src="js/data-exercise.js"></script>
   <script src="js/data-care.js"></script>

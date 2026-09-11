@@ -39,3 +39,8 @@ self.addEventListener('fetch', event => {
     return cached || network;
   }));
 });
+
+// 收到页面「跳过等待」指令后立即激活新版本（配合更新横幅的「刷新」按钮）
+self.addEventListener('message', event => {
+  if (event.data && event.data.type === 'SKIP_WAITING') self.skipWaiting();
+});

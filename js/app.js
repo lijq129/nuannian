@@ -116,6 +116,7 @@ function weekDates() {
 }
 let toastTimer;
 function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms || 1900); }
+function currentBuild() { const m = document.querySelector('meta[name="build-version"]'); return (m && m.content) ? m.content : (location.protocol === 'file:' ? '本地' : '未知'); }
 function speak(text) {
   if (!S.settings.voice || !window.speechSynthesis) return;
   try { const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = .92; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { }
@@ -1072,6 +1073,10 @@ function renderMe() {
       <p class="h-sub">档案、打卡、收藏和每日状态保存在当前浏览器。可导出 JSON 备份，也可导入暖年备份继续使用。</p>
       <div class="data-actions"><button class="btn sm" data-act="exportdata">导出数据备份</button><button class="btn ghost sm" data-act="chooseimport">导入数据更新</button></div>
       <input class="visually-hidden" type="file" id="data-import" accept="application/json,.json">
+      <div class="data-actions" style="margin-top:10px;align-items:center">
+        <span class="ver-line">当前版本 <b id="ver-no">${escapeHTML(currentBuild())}</b></span>
+        <button class="btn ghost sm" data-act="checkupdate">检查更新</button>
+      </div>
       <p class="data-meta">数据格式 v${APP_DATA_VERSION}${S.dataMeta.lastImportedAt ? ' · 最近导入 ' + new Date(S.dataMeta.lastImportedAt).toLocaleString('zh-CN') : ''}</p>
     </div>`;
     html += `<button class="btn ghost block" data-act="reset">清空全部数据</button>`;
@@ -1257,6 +1262,11 @@ const vClose = $('#vm-close'); if (vClose) vClose.onclick = closeVideo;
 const vModal = $('#vmodal'); if (vModal) vModal.addEventListener('click', e => { if (e.target === vModal) closeVideo(); });
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeVideo(); });
 
+/* 检测到新版本：显示更新横幅 */
+window.addEventListener('sw-update-ready', () => {
+  const b = $('#update-banner'); if (b) b.classList.remove('hidden');
+});
+
 /* 旧视频弹窗兼容函数；平台播放/登录限制由第三方决定。跟练库使用页面内播放器。 */
 function actImg(key, cls) {
   /* 真人示范图（assets/img/ex/*.png、assets/img/care/*.png）优先显示；
@@ -1314,6 +1324,25 @@ function closeVideo() {
 document.addEventListener('click', e => {
   const el = e.target.closest('[data-act]'); if (!el) return;
   const a = el.dataset.act;
+  /* 应用更新：顶部横幅的「刷新 / 忽略」与「我的」页的检查更新 */
+  if (a === 'swrefresh') { if (window.__applySWUpdate) window.__applySWUpdate(); return; }
+  if (a === 'swclose') { const b = $('#update-banner'); if (b) b.classList.add('hidden'); return; }
+  if (a === 'checkupdate') {
+    toast('正在检查更新…');
+    if (!('serviceWorker' in navigator)) { toast('当前环境不支持自动更新'); return; }
+    const doCheck = reg => {
+      if (!reg) { toast('暂时无法检查，请稍后再试'); return; }
+      reg.update().then(r => {
+        if (r && r.waiting) { window.dispatchEvent(new CustomEvent('sw-update-ready')); toast('发现新版本，点击刷新'); }
+        else toast('已是最新版本 ' + currentBuild());
+      }).catch(() => toast('检查更新失败，请稍后再试'));
+    };
+    navigator.serviceWorker.getRegistration().then(reg => {
+      if (reg) doCheck(reg);
+      else navigator.serviceWorker.register('./service-worker.js').then(doCheck).catch(() => toast('当前环境不支持自动更新'));
+    }).catch(() => toast('检查更新失败，请稍后再试'));
+    return;
+  }
   if (a === 'back') { goBack(); return; }
   if (a === 'healthclear') {
     const h = todayHealth(); h.status = 'clear'; h.symptom = ''; h.updatedAt = new Date().toISOString();
