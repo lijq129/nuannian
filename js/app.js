@@ -121,6 +121,16 @@ function speak(text) {
   if (!S.settings.voice || !window.speechSynthesis) return;
   try { const u = new SpeechSynthesisUtterance(text); u.lang = 'zh-CN'; u.rate = .92; speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) { }
 }
+// 把单个动作的「目标 + 全部步骤 + 安全提醒」用自然语言连贯播报，避免只念第一步的机械感
+function speakItem(it) {
+  if (!it) return;
+  const cn = ['一', '二', '三', '四', '五', '六', '七', '八'];
+  let text = `下面我们开始做${it.name}。`;
+  if (it.target) text += `这一项的目标是 ${it.target}。`;
+  (it.steps || []).forEach((s, i) => { text += `第${cn[i] || (i + 1)}步，${s}`; });
+  if (it.caution) text += `最后提醒您，${it.caution}`;
+  speak(text);
+}
 Object.assign(EX.SVG, CARE.SVG);
 
 /* ============ 专业线性图标库（替换 emoji，统一视觉） ============ */
@@ -1213,7 +1223,7 @@ function loadItem() {
   $('#p-sets').textContent = '目标：' + it.target;
   $('#p-caution').textContent = it.caution;
   $('#p-count').textContent = (P.i + 1) + '/' + (P.single ? 1 : P.obj.items.length);
-  speak(it.name + '。' + it.steps[0]);
+  speakItem(it);
   paint();
 }
 function paint() {
@@ -1242,7 +1252,7 @@ function finish() {
     if (P.tag === 'posture') c.posture = 1;
     if (P.tag === 'walk') c.walk = 1;
     if (P.tag === 'relax') c.sleep = 1;
-    save(); speak(o.name + '完成了，辛苦啦');
+    save(); speak(`您今天的 ${o.name} 练习已经做完了，辛苦您了，记得喝口温水、慢慢休息一下。`);
   }
   $('#player').classList.add('hidden');
   toast(P.single ? '完成' : o.name + ' 完成！已打卡');
