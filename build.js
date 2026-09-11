@@ -48,14 +48,22 @@ for (const ic of rootIcons()) fs.copyFileSync(path.join(ROOT, ic), path.join(DIS
 //    否则同一份源码在 Windows 与 Vercel(Linux) 上会算出不同哈希（失去缓存意义）。
 //    同时按"路径\0内容"拼接，避免不同文件内容相接时产生哈希碰撞。
 const hash = crypto.createHash('sha256');
-// 用相对 DIST 的路径 + 统一正斜杠参与哈希，避免 Windows(\\) 与 Linux(/) 路径分隔符不同导致跨平台哈希不一致
+// 文本文件归一化行尾（CRLF→LF）后再参与哈希，避免 Windows 工作区(CRLF) 与
+// Vercel(Linux, LF) 同一份源码字节不同导致跨平台哈希不一致。二进制文件(PNG 等)不动。
+const TEXT_EXT = ['.js', '.css', '.html', '.json', '.svg', '.txt', '.md', '.xml', '.webmanifest'];
+function isText(fp) { return TEXT_EXT.includes(path.extname(fp).toLowerCase()); }
+// 用相对 DIST 的路径 + 统一正斜杠参与哈希，避免 Windows(\\) 与 Linux(/) 路径分隔符不同
 function walk(p, rel) {
   const entries = fs.readdirSync(p).sort();
   for (const e of entries) {
     const fp = path.join(p, e);
     const r = (rel ? rel + '/' : '') + e;
     if (fs.statSync(fp).isDirectory()) walk(fp, r);
-    else { hash.update(r + '\0'); hash.update(fs.readFileSync(fp)); }
+    else {
+      let buf = fs.readFileSync(fp);
+      if (isText(fp)) buf = Buffer.from(buf.toString('utf8').replace(/\r\n/g, '\n'));
+      hash.update(r + '\0'); hash.update(buf);
+    }
   }
 }
 walk(DIST, '');
