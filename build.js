@@ -53,6 +53,7 @@ const hash = crypto.createHash('sha256');
 const TEXT_EXT = ['.js', '.css', '.html', '.json', '.svg', '.txt', '.md', '.xml', '.webmanifest'];
 function isText(fp) { return TEXT_EXT.includes(path.extname(fp).toLowerCase()); }
 // 用相对 DIST 的路径 + 统一正斜杠参与哈希，避免 Windows(\\) 与 Linux(/) 路径分隔符不同
+const walklog = [];
 function walk(p, rel) {
   const entries = fs.readdirSync(p).sort();
   for (const e of entries) {
@@ -62,12 +63,15 @@ function walk(p, rel) {
     else {
       let buf = fs.readFileSync(fp);
       if (isText(fp)) buf = Buffer.from(buf.toString('utf8').replace(/\r\n/g, '\n'));
+      walklog.push({ f: r, h: crypto.createHash('sha256').update(buf).digest('hex').slice(0, 12) });
       hash.update(r + '\0'); hash.update(buf);
     }
   }
 }
 walk(DIST, '');
 const short = hash.digest('hex').slice(0, 10);
+// 调试：记录 walk 实际参与哈希的文件清单（不影响哈希本身，写在 walk 之后）
+fs.writeFileSync(path.join(DIST, '_walkdebug.json'), JSON.stringify({ short, count: walklog.length, files: walklog }, null, 2));
 
 // 3. 写入 SW 缓存键 + 版本文件 + index.html 构建版本 meta
 let sw = fs.readFileSync(path.join(DIST, 'service-worker.js'), 'utf8');
