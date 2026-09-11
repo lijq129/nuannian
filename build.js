@@ -1,9 +1,11 @@
-// 构建脚本：清空重建 dist/，并用全部资源的内容哈希生成 Service Worker 缓存键。
-// 这样改任意文件 → 哈希变 → 客户端 SW 自动拉取新版，无需手动升版本号。
-// 用法：node build.js   或   npm run build
+// 构建脚本：清空重建 dist/，并用 Git commit 短 SHA 生成 Service Worker 缓存键。
+// 这样每次 git push（产生新 commit）→ 缓存键自动变 → 客户端 SW 拉取新版，
+// 无需手动升版本号，也避免了跨平台内容哈希不一致的问题。
+// 用法：node build.js   或  npm run build
 const fs = require('fs');
 const path = require('path');
 const crypto = require('crypto');
+const { execSync } = require('child_process');
 
 const ROOT = __dirname;
 const DIST = path.join(ROOT, 'dist');
@@ -43,31 +45,32 @@ for (const e of ENTRIES) {
 }
 for (const ic of rootIcons()) fs.copyFileSync(path.join(ROOT, ic), path.join(DIST, ic));
 
-// 2. 计算 dist/ 全部文件内容哈希（短哈希作为缓存键）
-//    注意：readdirSync 的顺序在不同平台/文件系统上不保证一致，必须显式排序，
-//    否则同一份源码在 Windows 与 Vercel(Linux) 上会算出不同哈希（失去缓存意义）。
-//    同时按"路径\0内容"拼接，避免不同文件内容相接时产生哈希碰撞。
-const hash = crypto.createHash('sha256');
-// 文本文件归一化行尾（CRLF→LF）后再参与哈希，避免 Windows 工作区(CRLF) 与
-// Vercel(Linux, LF) 同一份源码字节不同导致跨平台哈希不一致。二进制文件(PNG 等)不动。
-const TEXT_EXT = ['.js', '.css', '.html', '.json', '.svg', '.txt', '.md', '.xml', '.webmanifest'];
-function isText(fp) { return TEXT_EXT.includes(path.extname(fp).toLowerCase()); }
-// 用相对 DIST 的路径 + 统一正斜杠参与哈希，避免 Windows(\\) 与 Linux(/) 路径分隔符不同
-function walk(p, rel) {
-  const entries = fs.readdirSync(p).sort();
-  for (const e of entries) {
-    const fp = path.join(p, e);
-    const r = (rel ? rel + '/' : '') + e;
-    if (fs.statSync(fp).isDirectory()) walk(fp, r);
-    else {
-      let buf = fs.readFileSync(fp);
-      if (isText(fp)) buf = Buffer.from(buf.toString('utf8').replace(/\r\n/g, '\n'));
-      hash.update(r + '\0'); hash.update(buf);
+// 2. 决定 SW 缓存键：优先用 Git commit 短 SHA（跨平台一致，每次 push 自动刷新）
+let short;
+try {
+  short = execSync('git rev-parse --short HEAD', { cwd: ROOT, encoding: 'utf8' }).trim();
+  if (short.length > 10) short = short.slice(0, 10);
+} catch (e) {
+  // 不在 Git 仓库时 fallback：计算 dist 全部文件内容哈希
+  const hash = crypto.createHash('sha256');
+  const TEXT_EXT = ['.js', '.css', '.html', '.json', '.svg', '.txt', '.md', '.xml', '.webmanifest'];
+  function isText(fp) { return TEXT_EXT.includes(path.extname(fp).toLowerCase()); }
+  function walk(p, rel) {
+    const entries = fs.readdirSync(p).sort();
+    for (const e of entries) {
+      const fp = path.join(p, e);
+      const r = (rel ? rel + '/' : '') + e;
+      if (fs.statSync(fp).isDirectory()) walk(fp, r);
+      else {
+        let buf = fs.readFileSync(fp);
+        if (isText(fp)) buf = Buffer.from(buf.toString('utf8').replace(/\r\n/g, '\n'));
+        hash.update(r + '\0'); hash.update(buf);
+      }
     }
   }
+  walk(DIST, '');
+  short = hash.digest('hex').slice(0, 10);
 }
-walk(DIST, '');
-const short = hash.digest('hex').slice(0, 10);
 
 // 3. 写入 SW 缓存键 + 版本文件 + index.html 构建版本 meta
 let sw = fs.readFileSync(path.join(DIST, 'service-worker.js'), 'utf8');
