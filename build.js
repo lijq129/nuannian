@@ -44,15 +44,21 @@ for (const e of ENTRIES) {
 for (const ic of rootIcons()) fs.copyFileSync(path.join(ROOT, ic), path.join(DIST, ic));
 
 // 2. 计算 dist/ 全部文件内容哈希（短哈希作为缓存键）
+//    注意：readdirSync 的顺序在不同平台/文件系统上不保证一致，必须显式排序，
+//    否则同一份源码在 Windows 与 Vercel(Linux) 上会算出不同哈希（失去缓存意义）。
+//    同时按"路径\0内容"拼接，避免不同文件内容相接时产生哈希碰撞。
 const hash = crypto.createHash('sha256');
-function walk(p) {
-  for (const e of fs.readdirSync(p)) {
+// 用相对 DIST 的路径 + 统一正斜杠参与哈希，避免 Windows(\\) 与 Linux(/) 路径分隔符不同导致跨平台哈希不一致
+function walk(p, rel) {
+  const entries = fs.readdirSync(p).sort();
+  for (const e of entries) {
     const fp = path.join(p, e);
-    if (fs.statSync(fp).isDirectory()) walk(fp);
-    else hash.update(fs.readFileSync(fp));
+    const r = (rel ? rel + '/' : '') + e;
+    if (fs.statSync(fp).isDirectory()) walk(fp, r);
+    else { hash.update(r + '\0'); hash.update(fs.readFileSync(fp)); }
   }
 }
-walk(DIST);
+walk(DIST, '');
 const short = hash.digest('hex').slice(0, 10);
 
 // 3. 写入 SW 缓存键 + 版本文件 + index.html 构建版本 meta
