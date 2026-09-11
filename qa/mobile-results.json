@@ -1,0 +1,11 @@
+{
+  "serviceWorker": true,
+  "offlineShell": true,
+  "inputFontPx": 16,
+  "touchTargets": true,
+  "portrait": true,
+  "landscape": true,
+  "originalImagesPreserved": 24,
+  "optimizedImages": 24,
+  "errors": []
+}

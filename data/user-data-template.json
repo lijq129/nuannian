@@ -1,0 +1,38 @@
+{
+  "product": "nuannian",
+  "schemaVersion": 3,
+  "exportedAt": "2026-09-11T00:00:00.000Z",
+  "data": {
+    "profile": {
+      "name": "胜兰",
+      "sex": "f",
+      "age": 58,
+      "height": 160,
+      "weight": 60,
+      "act": 1.2,
+      "goal": "thyroid",
+      "avoids": [],
+      "focus": ["neck", "leg", "thyroid"],
+      "thyroidSurgery": "已切除（范围待确认）",
+      "vertigoHistory": true,
+      "chronicLegPain": true,
+      "exerciseApproved": false,
+      "movementLimits": "避免颈部快速转动、后仰和强力对抗；出现眩晕或腿痛明显加重时停止。",
+      "clinicianNote": "",
+      "elder": true,
+      "waterGoal": 8
+    },
+    "settings": { "font": 1, "voice": true },
+    "med": { "drugTime": "06:30", "calciumTime": "12:30", "calciumEnabled": false, "lowIodine": false },
+    "checks": {},
+    "healthChecks": {},
+    "dietOff": {},
+    "logs": [],
+    "myVideos": [],
+    "shop": {},
+    "mealOverride": {},
+    "confirmed": {},
+    "dataMeta": { "version": 3, "lastImportedAt": "" },
+    "favs": { "recipe": [], "course": [], "care": [] }
+  }
+}

@@ -1,0 +1,119 @@
+{
+  "live": true,
+  "players": [
+    {
+      "id": "collection-1",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1Hu4y1v7sL&page=1&autoplay=0&danmaku=0",
+      "time": 1.55092,
+      "paused": false,
+      "duration": 810.8
+    },
+    {
+      "id": "collection-2",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1PV411v7Ej&page=1&autoplay=0&danmaku=0",
+      "time": 1.577832,
+      "paused": false,
+      "duration": 1007
+    },
+    {
+      "id": "collection-3",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1pu411f75A&page=1&autoplay=0&danmaku=0",
+      "time": 1.830281,
+      "paused": false,
+      "duration": 1499
+    },
+    {
+      "id": "collection-4",
+      "src": "https://player.bilibili.com/player.html?bvid=BV16A411Y7bu&page=1&autoplay=0&danmaku=0",
+      "time": 1.587438,
+      "paused": false,
+      "duration": 936
+    },
+    {
+      "id": "collection-5",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1yW411N7uG&page=1&autoplay=0&danmaku=0",
+      "time": 1.575765,
+      "paused": false,
+      "duration": 599
+    },
+    {
+      "id": "collection-6",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1vU4y1g7Pg&page=1&autoplay=0&danmaku=0",
+      "time": 1.585893,
+      "paused": false,
+      "duration": 1201
+    },
+    {
+      "id": "collection-7",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1GX4y1j7xr&page=1&autoplay=0&danmaku=0",
+      "time": 1.603538,
+      "paused": false,
+      "duration": 898
+    },
+    {
+      "id": "collection-8",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1AV41167Pr&page=1&autoplay=0&danmaku=0",
+      "time": 1.569765,
+      "paused": false,
+      "duration": 842
+    },
+    {
+      "id": "collection-9",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1af4y1V7ZJ&page=1&autoplay=0&danmaku=0",
+      "time": 1.595573,
+      "paused": false,
+      "duration": 592
+    },
+    {
+      "id": "collection-10",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1RP8iznE7c&page=1&autoplay=0&danmaku=0",
+      "time": 1.586823,
+      "paused": false,
+      "duration": 2006
+    },
+    {
+      "id": "collection-11",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1pUbQzkEje&page=1&autoplay=0&danmaku=0",
+      "time": 1.586279,
+      "paused": false,
+      "duration": 653
+    },
+    {
+      "id": "collection-12",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1iJcMzvESC&page=1&autoplay=0&danmaku=0",
+      "time": 1.546257,
+      "paused": false,
+      "duration": 1925
+    },
+    {
+      "id": "collection-13",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1YzYDzeEZm&page=1&autoplay=0&danmaku=0",
+      "time": 1.569188,
+      "paused": false,
+      "duration": 2794
+    },
+    {
+      "id": "collection-14",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1JcgzzHEUx&page=1&autoplay=0&danmaku=0",
+      "time": 1.541064,
+      "paused": false,
+      "duration": 629
+    },
+    {
+      "id": "ankle",
+      "src": "https://player.bilibili.com/player.html?bvid=BV12DbH6UEfS&page=1&autoplay=0&danmaku=0",
+      "time": 1.591108,
+      "paused": false,
+      "duration": 358.876
+    },
+    {
+      "id": "hands",
+      "src": "https://player.bilibili.com/player.html?bvid=BV1WF411v7jg&page=1&autoplay=0&danmaku=0",
+      "time": 1.550171,
+      "paused": false,
+      "duration": 269
+    }
+  ],
+  "layouts": [],
+  "errors": []
+}

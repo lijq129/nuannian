@@ -1,0 +1,35 @@
+{
+  "live": false,
+  "coverage": {
+    "recipes": 68,
+    "missingRecipes": [],
+    "missingDishes": [],
+    "unknown": null,
+    "ready": "<div class=\"dp\"><div class=\"mm-row\"><b>份量：</b>200ml</div><div class=\"mm-row\"><b>参考：</b>约 1 分钟 · 免开火 · 饮品</div><div class=\"mm-row mm-steps\"><b>处理 / 食用：</b></div><p>1) 直接饮用或倒入杯中。</p><p>2) 想喝热的：隔温水或小火加热到锅边冒小泡即关火，约 60℃。</p><p>3) 不要用微波炉大火长时间加热。</p><p class=\"mm-tip\"><b>小贴士：</b>牛奶不需要煮沸，煮开反而损失营养。</p><p class=\"video-ready\">即食食材，按上方说明处理即可，无需烹饪视频。</p></div>"
+  },
+  "layouts": [
+    {
+      "width": 320,
+      "scrollWidth": 320,
+      "frameWidth": 246
+    },
+    {
+      "width": 390,
+      "scrollWidth": 390,
+      "frameWidth": 304
+    },
+    {
+      "width": 768,
+      "scrollWidth": 768,
+      "frameWidth": 474
+    },
+    {
+      "width": 1280,
+      "scrollWidth": 1280,
+      "frameWidth": 810
+    }
+  ],
+  "accordions": 68,
+  "lifecycle": "passed",
+  "errors": []
+}

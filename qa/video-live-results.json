@@ -1,0 +1,60 @@
+{
+  "live": true,
+  "samples": [
+    {
+      "name": "番茄炒蛋",
+      "frameUrl": "https://player.bilibili.com/player.html?bvid=BV1MfpwzcEKA&page=1&autoplay=0&danmaku=0",
+      "text": "进入哔哩哔哩，观看更高清",
+      "before": [
+        {
+          "duration": 306,
+          "readyState": 4,
+          "paused": true
+        }
+      ],
+      "play": "started",
+      "after": {
+        "currentTime": 2.485004,
+        "paused": false,
+        "readyState": 4
+      }
+    },
+    {
+      "name": "刀切馒头",
+      "frameUrl": "https://player.bilibili.com/player.html?bvid=BV1mp4y1B7nb&page=1&autoplay=0&danmaku=0",
+      "text": "进入哔哩哔哩，观看更高清",
+      "before": [
+        {
+          "duration": 251.78,
+          "readyState": 4,
+          "paused": true
+        }
+      ],
+      "play": "started",
+      "after": {
+        "currentTime": 2.828748,
+        "paused": false,
+        "readyState": 4
+      }
+    },
+    {
+      "name": "蓝莓玛芬",
+      "frameUrl": "https://player.bilibili.com/player.html?bvid=BV1XK411X7KL&page=1&autoplay=0&danmaku=0",
+      "text": "进入哔哩哔哩，观看更高清",
+      "before": [
+        {
+          "duration": 205,
+          "readyState": 4,
+          "paused": true
+        }
+      ],
+      "play": "started",
+      "after": {
+        "currentTime": 2.705722,
+        "paused": false,
+        "readyState": 4
+      }
+    }
+  ],
+  "errors": []
+}
