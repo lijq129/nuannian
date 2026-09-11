@@ -1,0 +1,11 @@
+{
+  "framework": {
+    "name": "nuannian",
+    "build": {
+      "builder": "static",
+      "buildCommand": "node build.js",
+      "output": "dist",
+      "installCommand": ""
+    }
+  }
+}

@@ -89,16 +89,20 @@ const HEALTH_ALERTS = {
 };
 function healthStatusHTML() {
   const h = todayHealth();
-  if (h.status === 'clear') return `<section class="daily-safety is-clear" id="daily-safety"><div><b>${icon('check')} 今日状态已确认</b><p>未记录页面所列警示症状，可以从低强度开始；过程中不适仍要立即停止。</p></div><button class="btn ghost sm" data-act="healthreset">重新填写</button></section>`;
-  if (h.status === 'alert') return `<section class="daily-safety is-alert" id="daily-safety"><div><b>${icon('warning')} 今天先不跟练</b><p>${escapeHTML(HEALTH_ALERTS[h.symptom] || '今天记录了不适')}。${h.symptom === 'chest' ? '请立即呼叫 120。' : '请停止活动并及时联系家人或就医；若同时胸痛或呼吸困难，立即呼叫 120。'}</p></div><button class="btn ghost sm" data-act="healthreset">重新填写</button></section>`;
-  return `<section class="daily-safety" id="daily-safety"><div class="daily-safety-head"><b>${icon('shield')} 开始前先确认今天的状态</b><p>这不是诊断，只用于决定今天是否应暂停活动。</p></div><div class="safety-choices"><button class="btn sm" data-act="healthclear">以上警示症状均没有</button><button class="btn ghost sm" data-act="healthalert" data-kind="dizzy">有头晕或走路不稳</button><button class="btn ghost sm" data-act="healthalert" data-kind="leg">单侧腿突发肿痛</button><button class="btn ghost sm" data-act="healthalert" data-kind="chest">胸痛或呼吸困难</button></div></section>`;
+  /* 只有真正记录了警示症状时才醒目提示，其余情况收成一行，不再占屏 */
+  if (h.status === 'alert') return `<section class="daily-safety is-alert" id="daily-safety"><div><b>${icon('warning')} 今天先歇一歇</b><p>${escapeHTML(HEALTH_ALERTS[h.symptom] || '今天记录了不舒服')}。${h.symptom === 'chest' ? '请立即呼叫 120。' : '先别活动，及时联系家人或就医；若同时胸痛或呼吸困难，立即呼叫 120。'}</p></div><button class="btn ghost sm" data-act="healthreset">重新填写</button></section>`;
+  if (h.status === 'clear') return `<div class="health-strip is-clear" id="daily-safety">${icon('check')}<span>今天状态不错，量力做就好</span><button class="link" data-act="healthreset">重填</button></div>`;
+  return `<details class="health-strip" id="daily-safety"><summary>${icon('shield')}<span>身体不舒服的那几天，先歇一歇</span><em>看情况</em></summary><div class="safety-choices"><button class="btn sm" data-act="healthclear">今天没有这些情况</button><button class="btn ghost sm" data-act="healthalert" data-kind="dizzy">有头晕或走路不稳</button><button class="btn ghost sm" data-act="healthalert" data-kind="leg">单侧腿突发肿痛</button><button class="btn ghost sm" data-act="healthalert" data-kind="chest">胸痛或呼吸困难</button></div><p class="health-strip-note">只用来判断今天适不适合活动，不是诊断。平时不用管它。</p></details>`;
 }
 function exerciseReady() {
+  /* 只有记录到警示症状才拦；没确认过也照常开始，练习前的提醒与每条动作的注意已经覆盖 */
   const h = todayHealth();
-  if (h.status === 'clear') return true;
-  toast(h.status === 'alert' ? '今天已记录警示症状，暂不开始活动' : '请先完成今日状态确认', 3200);
-  setTimeout(() => document.querySelector('#daily-safety')?.scrollIntoView({ block:'center', behavior:'smooth' }), 40);
-  return false;
+  if (h.status === 'alert') {
+    toast('今天记了不舒服的情况，先休息，别勉强活动', 3200);
+    setTimeout(() => document.querySelector('#daily-safety')?.scrollIntoView({ block:'center', behavior:'smooth' }), 40);
+    return false;
+  }
+  return true;
 }
 function mmss(s) { return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0'); }
 function greet() { const h = new Date().getHours(); return h < 6 ? '夜深了' : h < 11 ? '早上好' : h < 14 ? '中午好' : h < 18 ? '下午好' : '晚上好'; }
@@ -250,7 +254,7 @@ function noMealMatch(type) {
   return { name:`${label}暂不自动推荐`, kcal:0, pro:0, unavailable:true, foods:[], has:[],
     tip:'没有找到同时符合全部忌口或当前低碘要求的预设搭配。系统不会忽略限制，请在“我的”核对设置，必要时咨询医生或营养师。' };
 }
-function pickMeal(type, targetKcal, off) {
+function pickMeal(type, targetKcal, off, seed) {
   const p = P0(), av = p.avoids || [];
   const pool = DIET.meals[type].filter(m => !mealHasBlockedContent(m, av));
   if (!pool.length) return noMealMatch(type);
@@ -258,7 +262,7 @@ function pickMeal(type, targetKcal, off) {
   const cand = (byGoal.length ? byGoal : pool);
   const sorted = cand.slice().sort((a, b) => Math.abs(a.kcal - targetKcal) - Math.abs(b.kcal - targetKcal));
   const top = sorted.slice(0, 5);   // 取最接近目标的 5 个，按日期轮换，保证每天都不同
-  return top[(dayIndex() + (off || 0)) % top.length];
+  return top[(dayIndex() + (seed || 0) + (off || 0)) % top.length];  // seed: 明日推荐 +1，与今日错开一档
 }
 function nextDayKey() { const d = new Date(); d.setDate(d.getDate() + 1); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
 function nextDayLabel() { const d = new Date(); d.setDate(d.getDate() + 1); return (d.getMonth() + 1) + '月' + d.getDate() + '日'; }
@@ -276,7 +280,7 @@ function dayPlan(isNext) {
   const key = isNext ? nextDayKey() : today();
   const p = P0(), t = calcTarget(p), sp = mealSplit(t.kcal);
   const off = (S.dietOff[key] || {});
-  const get = type => mealOverride(type, key) || pickMeal(type, sp[type], off[type]);
+  const get = type => mealOverride(type, key) || pickMeal(type, sp[type], off[type], isNext ? 1 : 0);
   if (S.confirmed && S.confirmed[key]) {
     const plan = JSON.parse(JSON.stringify(S.confirmed[key]));
     ['breakfast','lunch','dinner','snack'].forEach(type => {
@@ -292,7 +296,17 @@ function tomorrowPlan() { return dayPlan(true); }
 function buildShop(plan) {
   const keys = [['breakfast', '🌅 早餐'], ['lunch', '☀️ 午餐'], ['dinner', '🌙 晚餐'], ['snack', '🍎 加餐']];
   const list = [];
-  keys.forEach(([k, label]) => (plan[k].foods || []).forEach(f => list.push({ meal: label, name: f[0], amt: f[1] })));
+  keys.forEach(([k, label]) => {
+    const seen = {};                                   // 食材名 → 用量数组（同餐去重合并）
+    (plan[k].foods || []).forEach(([food, amt]) => {
+      const ings = (MEAL_FOOD_ING && MEAL_FOOD_ING[food]) || [[food, amt || '']];   // 菜品 → 真实采购材料；未收录则保留原名
+      ings.forEach(([ing, a]) => { if (ing) (seen[ing] = seen[ing] || []).push(a || ''); });
+    });
+    Object.keys(seen).forEach(ing => {
+      const amts = [...new Set(seen[ing].filter(Boolean))];
+      list.push({ meal: label, name: ing, amt: amts.join('、') });
+    });
+  });
   return list;
 }
 
@@ -500,17 +514,17 @@ $$('.tab-ico').forEach(e => e.innerHTML = icon(e.dataset.ico));
 
 /* ================= 首页工作台 ================= */
 const MODULES = [
-  { id: 'diet', ico: 'diet', color: '#31584A', name: '今日三餐', desc: '三餐搭配参考', to: 'diet', tab: 'menu' },
-  { id: 'recipe', ico: 'recipe', color: '#94634A', name: '家常菜谱', desc: '菜式与中西面点', to: 'diet', tab: 'recipe' },
-  { id: 'exercise', ico: 'exercise', color: '#52675E', name: '温和活动', desc: '按自己的节奏', to: 'move', tab: 'course' },
-  { id: 'care', ico: 'care', color: '#74704A', name: '日常养护', desc: '照顾生活细节', to: 'move', tab: 'course' }
+  { id: 'diet', ico: 'diet', color: '#31584A', name: '今日三餐', desc: '今天吃什么', to: 'diet', tab: 'menu' },
+  { id: 'recipe', ico: 'recipe', color: '#94634A', name: '家常菜谱', desc: '翻翻菜谱', to: 'diet', tab: 'recipe' },
+  { id: 'exercise', ico: 'exercise', color: '#C2622E', name: '温和活动', desc: '松松筋骨', to: 'move', tab: 'course' },
+  { id: 'care', ico: 'care', color: '#B5832E', name: '日常养护', desc: '生活小细节', to: 'move', tab: 'course' }
 ];
 
 function ringSVG(done, total) {
   const R = 32, C = 2 * Math.PI * R;
   return `<svg class="ring" viewBox="0 0 80 80">
-    <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#4FC08D"/><stop offset="100%" stop-color="#1F8C5F"/></linearGradient></defs>
-    <circle cx="40" cy="40" r="${R}" fill="none" stroke="#EDF3F0" stroke-width="8"/>
+    <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFB36B"/><stop offset="100%" stop-color="#FF6F91"/></linearGradient></defs>
+    <circle cx="40" cy="40" r="${R}" fill="none" stroke="#F6E4D6" stroke-width="8"/>
     <circle cx="40" cy="40" r="${R}" fill="none" stroke="url(#rg)" stroke-width="8" stroke-linecap="round"
       stroke-dasharray="${C}" stroke-dashoffset="${C * (1 - done / total)}" transform="rotate(-90 40 40)"/>
   </svg>`;
@@ -525,11 +539,11 @@ function renderHome() {
   let html = `<div class="brandbar"><span class="wordmark">${icon('care')} 暖年</span><span>${new Date().getMonth()+1}月${new Date().getDate()}日 · 周${'日一二三四五六'[new Date().getDay()]}</span></div><div class="hero">
     <div class="hero-top">
       <div>
-        <span class="eyebrow">把日子过得舒服一点</span>
+        <span class="eyebrow">把日子过得松快一点</span>
         <h1 class="hi">${greet()}，${escapeHTML(p.name)}</h1>
-        <div class="dt">好好吃饭，慢慢活动。<br>今天也照顾好自己。</div>
+        <div class="dt">吃好一点，动一动，<br>把今天过得松快些。</div>
       </div>
-      <img class="hero-photo" src="assets/photos/window-light.jpg" alt="窗边自然光下的绿植" width="1200" height="1714">
+      <img class="hero-photo" src="assets/photos/hero-cartoon.png" alt="晨光下开心舒展的卡通人物" width="1024" height="1536">
     </div>
   </div>
     <div class="search"><input type="search" id="q" aria-label="搜索菜谱、课程、养护知识" placeholder="搜索菜谱、课程、养护知识" value="${escapeHTML(q)}"></div>
@@ -557,15 +571,17 @@ function renderHome() {
     </div>`;
   }
 
-  html += healthStatusHTML();
+  /* 首页不再放“开始前状态检查”提示：需要时在「活动养护」页确认即可，减少打扰 */
 
-  /* 今日打卡（置于功能宫格下方） */
+  /* 今日打卡：生活打卡 + 运动活动合并展示，明细条数与进度环分母保持一致 */
+  const tasks = actTasks();
+  const fin = tasks.filter(t => isDone(c, t.id)).length;
   html += `<div class="card">
     <div class="progress-card">
       <div class="ringbox">${ringSVG(done, allLen)}<div class="ringnum"><b>${done}<i>/${allLen}</i></b></div></div>
       <div style="flex:1;min-width:0">
         <div class="pg-title">今日打卡</div>
-        <div class="ring-sub">${done === allLen ? '全部完成，很棒！' : done ? '已完成 ' + done + ' 项，继续' : '点一下就打卡'}</div>
+        <div class="ring-sub">${done === allLen ? '今天全打卡啦，真棒！' : done ? '还差 ' + (allLen - done) + ' 项，慢慢来' : '点一下就算打卡'}</div>
       </div>
     </div>
     <div class="checks">${chk.map(x => {
@@ -574,6 +590,9 @@ function renderHome() {
     return `<button class="chk ${on ? 'on' : ''}" data-act="chk" data-id="${x.id}">
         <span class="ci">${icon(x.ico)}</span><span class="cn">${x.name}</span><span class="cd">${label}</span></button>`;
   }).join('')}</div>
+    <div class="card-h subhead"><span class="ct">今天动一动</span><span class="tag o">${fin}/${tasks.length} 已完成</span></div>
+    <div class="actlist">${tasks.map(actRowHTML).join('')}</div>
+    <p class="dish-hint">跟着做完会自动打卡，也可以直接点「直接打卡」。<button class="more" data-act="goact">去练习 →</button></p>
   </div>`;
 
   /* 今日饮食搭配 */
@@ -585,17 +604,7 @@ function renderHome() {
       <span style="flex:1;min-width:0"><b>${m[2]}</b>　${it.name}</span>
       <span class="fa">${it.kcal} 千卡</span></div>`;
   }).join('')}
-    <button class="btn block sm" style="margin-top:12px" data-act="goto" data-view="diet" data-tab="menu">看完整食谱与做法</button>
-  </div>`;
-
-  /* 今日活动：运动打卡入口，状态与进度环同步（活动养护页已不再单列「今日」子页） */
-  const tasks = actTasks();
-  const fin = tasks.filter(t => isDone(c, t.id)).length;
-  html += `<div class="sec"><h2>今日活动</h2><button class="more" data-act="goact">去练习 →</button></div>
-  <div class="card">
-    <div class="card-h"><span class="ct">今天动一动</span><span class="tag o">${fin}/${tasks.length} 已完成</span></div>
-    <div class="actlist">${tasks.map(actRowHTML).join('')}</div>
-    <p class="dish-hint">练完整套会自动打卡；也可以在这里直接点「直接打卡」。完成情况会计入上方进度环。</p>
+    <button class="btn block sm" style="margin-top:12px" data-act="goto" data-view="diet" data-tab="menu">翻翻完整食谱与做法</button>
   </div>`;
 
   html += `<div class="disclaimer">${LEGAL.disclaimer}</div>`;
@@ -632,7 +641,7 @@ function searchResults(q) {
   CARE.routine.forEach(r => { if ((r.name + r.points.join('')).toLowerCase().includes(k)) out.push({ type: 'routine', ico: r.icon, t: r.name, d: r.points[0], id: r.id }); });
   CARE.relax.forEach(r => { if ((r.name + r.level).toLowerCase().includes(k)) out.push({ type: 'relax', ico: r.icon, t: r.name, d: `${r.min} 分钟 · ${r.level}`, id: r.id }); });
 
-  if (!out.length) return `<div class="card"><div class="empty"><span class="e-ico">🔍</span>没找到「${escapeHTML(q)}」<br>换个词试试，比如：肩背、腿部、番茄</div></div>`;
+  if (!out.length) return `<div class="card"><div class="empty"><span class="e-ico">🔍</span>没找到「${escapeHTML(q)}」<br>换个词试试，比如：肩背、番茄、散步</div></div>`;
   return `<div class="sec"><h2>搜索结果 ${out.length}</h2></div><div class="list">${out.map(o => `<div class="item" data-act="open${o.type}" data-id="${o.id}">
     <span class="ico">${o.ico}</span><span class="txt"><span class="t1">${o.t}</span><br><span class="t2">${o.d}</span></span><span class="arw">›</span></div>`).join('')}</div>`;
 }
@@ -658,7 +667,7 @@ function mealCards(plan, target, editable) {
           <button class="dish-h" data-act="dish" aria-expanded="false"><span class="dn">${f[0]}</span><span class="fa">${f[1]}</span><span class="arw">›</span></button>
           <div class="dish-b" hidden>${dishStepHTML(f[0], f[1])}</div>
         </div>`).join('')}</div>
-        ${it.unavailable ? '' : '<p class="dish-hint">点一下菜名，就能看到这道菜的文字做法和真人演示视频。</p>'}
+        ${it.unavailable ? '' : '<p class="dish-hint">点菜名就能看做法和演示视频。</p>'}
         <div class="meal-tip ${it.unavailable ? 'meal-unavailable' : ''}"><b>${it.unavailable ? '未生成推荐：' : '搭配说明：'}</b>${it.override ? it.tip : it.unavailable ? it.tip : '本餐估算约 ' + it.kcal + ' 千卡、蛋白质 ' + it.pro + ' 克；' + it.tip}</div>
         ${conflicts.length ? `<div class="meal-cf"><span class="cf-warn"><span class="cf-ico">${icon('shield')}</span>需要留意</span>${conflicts.map(c => `<div class="cf-line"><b>${c.label}：</b>${c.warn}</div>`).join('')}</div>` : ''}
         ${editable ? `<div class="meal-act">
@@ -669,7 +678,7 @@ function mealCards(plan, target, editable) {
   }).join('');
 }
 function renderDiet() {
-  let html = pageHeading('好好吃饭', '家常食材，规律三餐。') + `<div class="seg">
+  let html = pageHeading('好好吃饭', '今天想吃点什么？') + `<div class="seg">
     <button class="${dietTab === 'menu' ? 'on' : ''}" data-act="dtab" data-t="menu">今日三餐</button>
     <button class="${dietTab === 'tmrw' ? 'on' : ''}" data-act="dtab" data-t="tmrw">明日推荐</button>
     <button class="${dietTab === 'recipe' ? 'on' : ''}" data-act="dtab" data-t="recipe">家常菜谱</button>
@@ -678,14 +687,14 @@ function renderDiet() {
   if (dietTab === 'menu') {
     const plan = todayPlan(), t = plan.target, p = P0(), c = todayChecks();
     html += `<div class="card">
-      <div class="card-h"><span class="ct">每日估算参考</span><span class="tag o">${(GOALS.find(g => g.id === p.goal) || {}).name}</span></div>
+      <div class="card-h"><span class="ct">今天的大致搭配</span><span class="tag o">${(GOALS.find(g => g.id === p.goal) || {}).name}</span></div>
       <div class="macro">
         <div class="mc"><b>${t.kcal}</b><span>千卡</span></div>
         <div class="mc"><b>${t.protein}</b><span>克蛋白质</span></div>
         <div class="mc"><b>${t.carb}</b><span>克碳水</span></div>
         <div class="mc"><b>${t.fat}</b><span>克脂肪</span></div>
       </div>
-      <div class="note" style="margin-top:10px">以下数值是按身高、体重和活动量估算的生活参考，不是营养处方。${DIET.goalNotes[p.goal] || ''}</div>
+      <div class="note" style="margin-top:10px">这些数字是按你的身高体重估的日常参考，不是营养处方，看看就好。${DIET.goalNotes[p.goal] || ''}</div>
     </div>`;
 
     html += mealCards(plan, t, true);
@@ -705,7 +714,7 @@ function renderDiet() {
     }
 
     html += `<div class="card">
-      <div class="card-h"><span class="ct">今日怎么轮换</span><span class="tag o">每天自动更新</span></div>
+      <div class="card-h"><span class="ct">换着吃，不单调</span><span class="tag o">每天自动更新</span></div>
       <p class="h-sub">已按你的资料和忌口提供今日搭配参考，每天自动轮换；觉得不合适可点「换一换」。这不是个体化营养处方。忌口全局生效（当前：${(p.avoids || []).length ? p.avoids.map(a => (AVOIDS.find(x => x.id === a) || {}).name).join('、') : '无'}）。</p>
     </div>`;
   }
@@ -724,13 +733,13 @@ function renderDiet() {
         <div class="mc"><b>${tt.carb}</b><span>克碳水</span></div>
         <div class="mc"><b>${tt.fat}</b><span>克脂肪</span></div>
       </div>
-      <div class="note" style="margin-top:10px">照着下方清单备好食材，明早就能直接做；清单可逐餐「换一换」。</div>
+      <div class="note" style="margin-top:10px">照清单备好食材，明早就省事；想吃别的就逐餐「换一换」。</div>
     </div>`;
 
     /* 采购清单（上方，按餐分组、可换、可确认） */
     html += `<div class="card">
       <div class="card-h"><span class="ct">🛒 明日采购清单</span><span class="tag g" id="shopcnt">${shopDone.length}/${tShop.length}</span></div>
-      <p class="h-sub" style="margin:0 0 10px">点一下划掉已买的；「换一换」可调整某餐食材。</p>
+      <p class="h-sub" style="margin:0 0 10px">已按明日菜式展开成食材；点一下划掉已买的，想换菜就点「换一换」。</p>
       ${MEALS.map(([mk, nm]) => {
         const items = shopIdx.filter(s => s.meal.endsWith(nm));
         if (!items.length) return '';
@@ -748,7 +757,7 @@ function renderDiet() {
     /* 可做的菜式（下方）：只列菜名，做法到菜谱里看 */
     html += `<div class="card">
       <div class="card-h"><span class="ct">🍳 明日可做的菜式</span><span class="tag o">做法见菜谱</span></div>
-      <p class="h-sub" style="margin:0 0 10px">这是明日三餐要用到的菜，本页只列菜名、不展开做法。点任意一道，可跳到「家常菜谱」查看做法。</p>
+      <p class="h-sub" style="margin:0 0 10px">明天要做的菜都在这儿，点一下跳去菜谱看做法。</p>
       ${MEALS.map(([mk, nm]) => {
         const it = tp[mk] || {}, foods = it.foods || [];
         if (!foods.length) return '';
@@ -781,7 +790,7 @@ function renderDiet() {
     html += `<div class="chips">${tags.map(t => `<button class="chip ${recipeFilter === t ? 'on' : ''}" data-act="rtag" data-t="${t}">${t}</button>`).join('')}</div>`;
     const q = recipeQuery.trim().toLowerCase();
     const list = inCat.filter(r => (recipeFilter === '全部' || r.tags.includes(recipeFilter)) && (!q || (r.name + r.tags.join('') + r.scene + (r.kw || '')).toLowerCase().includes(q)));
-    if (!list.length) html += `<div class="card"><div class="empty"><span class="e-ico">🔍</span>没找到「${escapeHTML(recipeQuery)}」相关菜谱<br>换个词，或切回「全部」标签</div></div>`;
+    if (!list.length) html += `<div class="card"><div class="empty"><span class="e-ico">🔍</span>没找到「${escapeHTML(recipeQuery)}」，换个词，或切回「全部」看看</div></div>`;
     html += list.map(r => {
       const open = recipeOpen === r.id;
       const fav = (S.favs.recipe || []).includes(r.id);
@@ -862,7 +871,7 @@ function fitVideoCard(v, first) {
   const duration = Math.floor(v.duration / 60) + ':' + String(v.duration % 60).padStart(2, '0');
   const highRisk = v.level === '进阶' || /瑜伽|高低肩|直角肩|瘦小腿|下半身体态|沙漏腰/.test(`${v.name || ''}${v.focus || ''}`);
   return `<section class="acc fit-video-card ${first ? 'open' : ''}" data-acc data-fit-id="${escAttr(v.id)}" ${v.original ? 'data-restored-fit' : ''}>
-    <button class="acc-h"><span class="aico">${icon('play')}</span><span style="flex:1;min-width:0">${escAttr(v.name)}${highRisk ? ' <span class="tag r">需专业确认</span>' : ''}<span class="fit-meta">${escAttr(v.focus)} · 全片 ${duration}${v.original ? ` · 原标注 ${v.minutes} 分钟` : ''}</span></span><span class="arw">›</span></button>
+    <button class="acc-h"><span class="aico">${icon('play')}</span><span style="flex:1;min-width:0">${escAttr(v.name)}${highRisk ? ' <span class="tag r">先问医生</span>' : ''}<span class="fit-meta">${escAttr(v.focus)} · 全片 ${duration}${v.original ? ` · 原标注 ${v.minutes} 分钟` : ''}</span></span><span class="arw">›</span></button>
     <div class="acc-b">
       <p>${escAttr(v.desc)}</p>
       <p class="fit-caution"><b>跟练前：</b>${escAttr(v.caution)}</p>
@@ -878,12 +887,12 @@ function fitVideoCard(v, first) {
 }
 
 function renderMove() {
-  let html = pageHeading('动一动，照顾自己', '先做舒服的那一项。') + `<div class="chips mtab">${MOVE_TABS.map(([id, nm]) =>
+  let html = pageHeading('动一动，心情也亮起来', '挑一项顺眼的开始，累了就停。') + `<div class="chips mtab">${MOVE_TABS.map(([id, nm]) =>
     `<button class="chip ${moveTab === id ? 'on' : ''}" data-act="movetab" data-t="${id}">${nm}</button>`).join('')}</div>`;
 
   if (moveTab === 'course' || moveTab === 'video') {
     html += healthStatusHTML();
-    if (P0().movementLimits) html += `<div class="profile-limit"><b>档案中的动作限制</b><p>${escapeHTML(P0().movementLimits)}</p></div>`;
+    if (P0().movementLimits) html += `<div class="profile-limit"><b>需要留意的动作</b><p>${escapeHTML(P0().movementLimits)}</p></div>`;
   }
 
   /* ---------- 课程（养护课程） ---------- */
@@ -896,7 +905,7 @@ function renderMove() {
   if (moveTab === 'video') {
     html += `<div class="card">
       <div class="card-h"><span class="ct">${icon('video')} 跟练视频合集</span><span class="tag o">全部页面内播放</span></div>
-      <p class="h-sub" style="margin:0">原有 3 组 14 个条目全部保留。展开任一条即可在本页播放，无需跳转搜索；下方另有两段补充视频。先看示范，请专业人员确认动作适合自己后再跟练。</p>
+      <p class="h-sub" style="margin:0">按博主整理好了，展开任一条就能在本页播放，不用跳出去搜。先看示范，请专业人员确认后再跟练。</p>
       <p class="fit-caution"><b>今天不舒服，先不练。</b>有头晕、视物异常、走路不稳，或单侧腿突然肿痛、发热时，不要跟练并及时就医；伴胸痛、呼吸困难时立即呼叫 120。</p>
     </div>`;
     html += (typeof FIT_COLLECTIONS !== 'undefined' ? FIT_COLLECTIONS : []).map(fitCollectionCard).join('');
@@ -962,10 +971,10 @@ function courseCard(cs) {
     <div class="course-body">
       <h3>${cs.name}</h3>
       <p>${cs.sub}</p>
-      <div class="tags" style="margin:8px 0 0">${(cs.tags || []).map(t => `<span class="tag gray">${t}</span>`).join('')}${needsApproval ? ' <span class="tag o">需专业确认</span>' : ''}${done ? ' <span class="tag g">今天已完成</span>' : ''}</div>
+      <div class="tags" style="margin:8px 0 0">${(cs.tags || []).map(t => `<span class="tag gray">${t}</span>`).join('')}${needsApproval ? ' <span class="tag o">先问医生</span>' : ''}${done ? ' <span class="tag g">今天已完成</span>' : ''}</div>
       <div class="course-foot">
-        <button class="btn ${done ? 'ghost' : ''} sm" data-act="start" data-id="${cs.id}" data-needs-approval="${needsApproval}">${needsApproval && !P0().exerciseApproved ? '确认适用后练' : done ? '再做一次' : '开始练习'}</button>
-        <span class="tag gray">随时可以暂停</span>
+        <button class="btn ${done ? 'ghost' : ''} sm" data-act="start" data-id="${cs.id}" data-needs-approval="${needsApproval}">${needsApproval && !P0().exerciseApproved ? '先问医生再练' : done ? '再来一次' : '开始练习'}</button>
+        <span class="tag gray">累了就停</span>
       </div>
     </div>
   </div>`;
@@ -977,7 +986,7 @@ function renderMe() {
   const sy = window.scrollY;
   collectForm();
   const p = P0(), b = bmi(p), t = calcTarget(p);
-  let html = pageHeading('我的生活记录', '每一个小习惯，都值得记下。') + `<div class="seg">
+  let html = pageHeading('我的小日子', '每一点小坚持，都算数。') + `<div class="seg">
     <button class="${meTab === 'plan' ? 'on' : ''}" data-act="mtab" data-t="plan">我的</button>
     <button class="${meTab === 'fav' ? 'on' : ''}" data-act="mtab" data-t="fav">收藏</button>
     <button class="${meTab === 'record' ? 'on' : ''}" data-act="mtab" data-t="record">打卡</button>
@@ -998,7 +1007,7 @@ function renderMe() {
       <div class="kv"><span class="k">健康关注</span><span class="v">${(p.focus || []).map(f => (FOCUS.find(x => x.id === f) || {}).name).join('、') || '无'}</span></div>
       <div class="kv"><span class="k">甲状腺手术</span><span class="v">${escapeHTML(p.thyroidSurgery)}</span></div>
       <div class="kv"><span class="k">运动相关情况</span><span class="v">${p.vertigoHistory ? '有眩晕史' : '未记录眩晕史'} · ${p.chronicLegPain ? '长期腿痛' : '未记录长期腿痛'}</span></div>
-      <div class="kv"><span class="k">运动方案确认</span><span class="v">${p.exerciseApproved ? '已记录专业人员确认' : '尚未记录专业确认'}</span></div>
+      <div class="kv"><span class="k">居家活动</span><span class="v">${p.exerciseApproved ? '医生/康复师已确认' : '还没问过医生'}</span></div>
       <div class="kv kv-block"><span class="k">动作限制</span><span class="v">${escapeHTML(p.movementLimits || '未填写')}</span></div>
     </div>`;
 
@@ -1106,7 +1115,7 @@ function renderMe() {
     <div class="card">
       <div class="pg-title" style="margin-bottom:8px">本周身体状态</div>
       ${wd.map(x => { const h = (S.healthChecks || {})[x.key]; return `<div class="health-log"><span>${x.key === tk ? '今天' : '周' + x.label}</span><b class="${h?.status === 'alert' ? 'is-alert' : ''}">${!h || h.status === 'unknown' ? '未填写' : h.status === 'clear' ? '未记录警示症状' : escapeHTML(HEALTH_ALERTS[h.symptom] || '记录了不适')}</b></div>`; }).join('')}
-      <p class="h-sub">这里只记录本人选择的状态，不能代替诊断；反复不适请带记录咨询医生。</p>
+      <p class="h-sub">只记录你自己选的状态，不能代替诊断；如果总是不舒服，可以带着记录去问问医生。</p>
     </div>
     <div class="card">
       <div class="pg-title" style="margin-bottom:6px">最近的练习</div>
@@ -1258,13 +1267,18 @@ function actImg(key, cls) {
   return (typeof EX !== 'undefined' && EX.SVG[key]) ? EX.SVG[key] : '';
 }
 
-/* 练习前安全筛查：改为非阻塞提示，不再用 confirm 弹窗反复打断。
-   仅在开始练习时一次性 toast 展示；重要安全提醒仍保留在播放器每条动作的 caution 区。 */
+/* 练习前安全提醒：非阻塞 toast，且同一类每天只温和提醒一次，避免每次点「开始」都跳出来。
+   完整的安全要点仍保留在播放器每条动作的 caution 区，随时可看。 */
 function preScreenToast(tag) {
+  const key = (tag === 'leg' || tag === 'walk') ? 'leg' : (tag === 'neck' ? 'neck' : 'other');
+  const t = today();
+  S.prescreen = S.prescreen || {};
+  if (S.prescreen[key] === t) return;
+  S.prescreen[key] = t; save();
   let msg = '';
-  if (tag === 'neck') msg = '颈肩练习：若今天有头晕、视物异常、走路不稳、手脚麻木或新发剧烈头痛，请立即停止并就医。';
-  else if (tag === 'leg' || tag === 'walk') msg = '腿部/行走：若今天单侧腿突然肿胀、发热、压痛、皮肤变色或出血，请停止并就医；若同时胸痛或呼吸困难，立即呼叫 120。';
-  else msg = '练习中若出现头晕、胸痛、呼吸困难或明显加重的疼痛，请立即停止。';
+  if (tag === 'neck') msg = '开始前留意一下：今天如果头晕、看东西发花、走路发飘，或者手脚发麻、突然很头痛，就先停下来歇着，别勉强，需要时问问医生。';
+  else if (tag === 'leg' || tag === 'walk') msg = '开始前留意一下：如果一条腿突然肿起来、发热、按着疼、颜色变了或出血，就先别动、尽快就医；要是同时胸口疼或喘不上气，马上打 120。';
+  else msg = '中间如果头晕、胸口疼、喘不上气，或者哪里越来越疼，就先停下来歇一歇。';
   if (msg) toast(msg, 4200);
 }
 function openVideo(bv, title) {
@@ -1362,7 +1376,7 @@ document.addEventListener('click', e => {
   }
   if (a === 'opencourse') go('move', { moveTab:'course' });
   if (a === 'openroutine') go('move', { moveTab:'routine' });
-  /* 首页「今日活动」跳转 */
+  /* 首页「今天动一动」→ 活动养护 · 课程 */
   if (a === 'goact') go('move', { moveTab:'course' });
 
   if (a === 'swap') {
@@ -1382,7 +1396,7 @@ document.addEventListener('click', e => {
   }
   if (a === 'start') {
     const cs = EX.courses.find(c => c.id === el.dataset.id);
-    if (cs && ['whole','activate','strength','balance'].includes(cs.id) && !P0().exerciseApproved) { toast('这套课程含平衡或较多全身动作，请先让医生或康复师确认适用', 4200); return; }
+    if (cs && ['whole','activate','strength','balance'].includes(cs.id) && !P0().exerciseApproved) { toast('这套有平衡和全身动作，先请医生或康复师看看适不适合，再开始吧', 4200); return; }
     if (cs && exerciseReady()) startSession(cs, cs.id);
   }
   if (a === 'walkstart' && exerciseReady()) { startSession(EX.walkSession, 'walk'); }
@@ -1455,6 +1469,74 @@ document.addEventListener('click', e => {
   }
 });
 
+/* ================= 启动引导页 ================= */
+const ONBOARD_KEY = 'nuannian_onboarded';
+function maybeOnboard() {
+  try { if (localStorage.getItem(ONBOARD_KEY) === '1') return; } catch (e) { return; }
+  showOnboarding();
+}
+function showOnboarding() {
+  const ICON = {
+    heart: '<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#E85C86" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20.5S4.5 15.6 2.7 11.2C1.5 8.4 3.2 5 6.5 5c2 0 3.2 1.2 4 2.4C11.3 6.2 12.5 5 14.5 5c3.3 0 5 3.4 3.8 6.2C16.5 15.6 12 20.5 12 20.5z"/></svg>',
+    bowl: '<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#E8854C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.4 1-2 1-3M12 7c0-1.4 1-2 1-3M16 7c0-1.4 1-2 1-3"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" width="36" height="36" fill="none" stroke="#C2622E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v5c0 4.5-3 7.8-7 9-4-1.2-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg>'
+  };
+  const slides = [
+    { ico: ICON.heart, t: '欢迎来到暖年', d: '甲状腺术后日常养护的小帮手，陪你温和地动一动、好好吃饭、慢慢恢复。' },
+    { ico: ICON.bowl, t: '它能为你做什么', d: '温和活动跟练 · 200 道家常菜谱 · 每日健康打卡 · 用药与安全提醒，都在一个 App 里。' },
+    { ico: ICON.shield, t: '先记住一句', d: '本应用仅作日常养护参考；如有不适或异常，请及时就医或拨打急救电话 120。' }
+  ];
+  let idx = 0;
+  const root = document.createElement('div');
+  root.id = 'onboard';
+  root.className = 'onboard';
+  root.innerHTML =
+    '<div class="ob-card">' +
+      '<div class="ob-art"><img src="assets/photos/hero-cartoon.png" alt="暖年卡通形象"></div>' +
+      '<div class="ob-brand">暖年</div>' +
+      '<div class="ob-track">' + slides.map((s, i) =>
+        '<div class="ob-slide' + (i === 0 ? ' on' : '') + '" data-i="' + i + '">' +
+          '<div class="ob-ico">' + s.ico + '</div>' +
+          '<div class="ob-t">' + s.t + '</div>' +
+          '<div class="ob-d">' + s.d + '</div>' +
+        '</div>').join('') + '</div>' +
+      '<div class="ob-dots">' + slides.map((_, i) => '<i class="' + (i === 0 ? 'on' : '') + '"></i>').join('') + '</div>' +
+      '<div class="ob-acts">' +
+        '<button class="ob-skip" type="button">跳过</button>' +
+        '<button class="ob-next btn" type="button">下一步</button>' +
+      '</div>' +
+    '</div>';
+  document.body.appendChild(root);
+  document.body.style.overflow = 'hidden';
+  const slidesEls = Array.from(root.querySelectorAll('.ob-slide'));
+  const dots = Array.from(root.querySelectorAll('.ob-dots i'));
+  const nextBtn = root.querySelector('.ob-next');
+  const skipBtn = root.querySelector('.ob-skip');
+  function paint() {
+    slidesEls.forEach((el, i) => el.classList.toggle('on', i === idx));
+    dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+    nextBtn.textContent = idx === slides.length - 1 ? '开始使用' : '下一步';
+  }
+  function close() {
+    try { localStorage.setItem(ONBOARD_KEY, '1'); } catch (e) {}
+    root.remove(); document.body.style.overflow = '';
+  }
+  nextBtn.addEventListener('click', () => {
+    if (idx === slides.length - 1) close(); else { idx++; paint(); }
+  });
+  skipBtn.addEventListener('click', close);
+  let x0 = null;
+  const track = root.querySelector('.ob-track');
+  track.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  track.addEventListener('touchend', e => {
+    if (x0 === null) return;
+    const dx = e.changedTouches[0].clientX - x0; x0 = null;
+    if (Math.abs(dx) < 40) return;
+    if (dx < 0 && idx < slides.length - 1) { idx++; paint(); }
+    else if (dx > 0 && idx > 0) { idx--; paint(); }
+  });
+}
+
 /* ================= 渲染 ================= */
 function render() {
   if (currentView === 'home') renderHome();
@@ -1467,3 +1549,4 @@ function applyFont() { document.documentElement.style.fontSize = [16, 19, 22][S.
 
 applyFont();
 render();
+maybeOnboard();

@@ -1,13 +1,13 @@
 {
   "name": "暖年 · 每日养护",
   "short_name": "暖年",
-  "description": "甲状腺术后饮食与颈椎、腿部日常养护工作台",
+  "description": "每日饮食搭配、居家小活动与生活养护的暖心记录",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "display_override": ["standalone", "minimal-ui"],
-  "background_color": "#F7F7F2",
-  "theme_color": "#F7F7F2",
+  "background_color": "#FFF3E7",
+  "theme_color": "#FFF3E7",
   "lang": "zh-CN",
   "icons": [
     { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },

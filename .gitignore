@@ -1,4 +1,17 @@
-.sites-runtime/
+# 构建产物：由 build.js 自动生成，勿手动提交（CI 会重新构建）
+dist/
+
+# 项目数据：memory / skills 等非应用代码
 .workbuddy/
-qa/*.png
-*.tar.gz
+
+# 临时脚本与调试产物
+scripts/tmp/
+qa/
+
+# 依赖
+node_modules/
+
+# 系统/编辑器
+.DS_Store
+Thumbs.db
+*.log
