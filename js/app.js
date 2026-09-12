@@ -1315,7 +1315,7 @@ function openDyVideo(vid, title, url) {
   if (f) {
     if (vid) {
       f.classList.add('dy');
-      f.innerHTML = `<iframe src="https://open.douyin.com/player/video?vid=${encodeURIComponent(vid)}&autoplay=0" scrolling="no" frameborder="0" referrerpolicy="unsafe-url" allowfullscreen></iframe>`;
+      f.innerHTML = `<iframe src="https://open.douyin.com/player/video?vid=${encodeURIComponent(vid)}&autoplay=0" scrolling="no" frameborder="0" referrerpolicy="unsafe-url" allowfullscreen allow="fullscreen; picture-in-picture"></iframe>`;
     } else {
       f.classList.remove('dy'); f.innerHTML = '';
     }
@@ -1329,6 +1329,31 @@ function closeVideo() {
   const f = $('#vm-frame'); if (f) { f.innerHTML = ''; f.classList.remove('dy'); }
   const m = $('#vmodal'); if (m) m.classList.add('hidden');
 }
+/* 安卓微信等 X5 内核里，跨域 iframe 自带的「全屏」按钮经常被静默拦截，
+   因此在父页面（同源）提供一个可靠的「放大」按钮：由父页面请求全屏。 */
+function toggleVideoFullscreen() {
+  const m = document.getElementById('vmodal');
+  if (!m) return;
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  if (fsEl) { if (exit) exit.call(document); return; }
+  const req = m.requestFullscreen || m.webkitRequestFullscreen || m.mozRequestFullScreen || m.msRequestFullscreen;
+  if (!req) { toast('当前浏览器不支持全屏，可点「在原平台打开」'); return; }
+  try {
+    const p = req.call(m);
+    if (p && p.catch) p.catch(() => toast('当前环境不支持全屏，可点「在原平台打开」'));
+  } catch (e) { toast('当前环境不支持全屏，可点「在原平台打开」'); }
+}
+function syncVmodalFs() {
+  const b = document.getElementById('vm-fs');
+  if (!b) return;
+  const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  b.textContent = on ? '退出' : '放大';
+  b.setAttribute('aria-pressed', String(on));
+}
+document.addEventListener('fullscreenchange', syncVmodalFs);
+document.addEventListener('webkitfullscreenchange', syncVmodalFs);
+document.addEventListener('mozfullscreenchange', syncVmodalFs);
 
 /* ================= 事件委托 ================= */
 document.addEventListener('click', e => {
@@ -1337,6 +1362,7 @@ document.addEventListener('click', e => {
   /* 应用更新：顶部横幅的「刷新 / 忽略」与「我的」页的检查更新 */
   if (a === 'swrefresh') { if (window.__applySWUpdate) window.__applySWUpdate(); return; }
   if (a === 'swclose') { const b = $('#update-banner'); if (b) b.classList.add('hidden'); return; }
+  if (a === 'vmfs') { toggleVideoFullscreen(); return; }
   if (a === 'checkupdate') {
     toast('正在检查更新…');
     if (!('serviceWorker' in navigator)) { toast('当前环境不支持自动更新'); return; }

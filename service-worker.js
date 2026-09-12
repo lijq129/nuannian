@@ -1,4 +1,4 @@
-const CACHE = 'nuannian-shell-v071-mobile';
+const CACHE = 'nuannian-shell-v072-mobile';
 const SHELL = [
   './', './index.html', './manifest.json', './icon.svg', './icon-180.png', './icon-192.png', './icon-512.png',
   './css/style.css', './css/design.css',
