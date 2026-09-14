@@ -173,7 +173,9 @@ h1,h2,h3,h4,p { overflow-wrap:anywhere; } h1,h2,h3,h4,b,strong { font-weight:600
 .fitcol-h { flex-wrap:wrap; }
 .fit-extra-heading { font-size:1.1rem; margin:12px 0 0; }
 .fit-caution { background:#FDF4E6; color:#96682A; border-radius:14px; padding:12px 14px; line-height:1.8; font-size:.88rem; }
-.fit-player-actions { display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-top:12px; }
+.fit-player-actions { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:nowrap; margin-top:12px; }
+/* 两个按钮同行等分、不换行：安卓 / 微信 X5 会放大中文字号，flex-basis:0 + min-width:0 可避免被挤到下一行 */
+.fit-player-actions .btn { flex:1 1 0; min-width:0; white-space:nowrap; }
 .fit-player-actions a { color:var(--brand); padding:10px 0; text-underline-offset:4px; }
 .fit-video-card .video-note { color:var(--ink2); font-size:.8rem; line-height:1.8; overflow-wrap:anywhere; }
 .video-stage iframe { display:block; width:100%; height:100%; border:0; position:absolute; inset:0; }
