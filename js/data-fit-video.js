@@ -34,6 +34,21 @@ const FIT_COLLECTIONS = [
       { title: 'Eleni Fit · 45 分钟站立 HIIT', focus: '无跳跃 · 全身', minutes: 45, level: '进阶', id: 'collection-13', bv: 'BV1YzYDzeEZm', sourceTitle: "Eleni Fit - 45分钟全身有氧HIIT全程站立 暴汗减脂 塑形瘦身", up: "EleniFit伊莉妮", duration: 2794, page: 1, checked: '2026-09-11', matchNote: "保留完整视频，实际全片时长含片头和说明，与原条目概称可能不同。", q: 'Eleni Fit 站立HIIT' },
       { title: '低冲击 · 10 分钟运动前热身', focus: '运动前激活', minutes: 10, level: '入门', id: 'collection-14', bv: 'BV1JcgzzHEUx', sourceTitle: "MIZI 10分钟晨间热身运动｜新手友好，全程站立", up: "MIZI", duration: 629, page: 1, checked: '2026-09-11', matchNote: "接入 MIZI 的 10 分钟全程站立晨间热身版。", q: '低冲击 站立 热身' }
     ]
+  },
+  {
+    id: 'gentle', name: '温和养生跟练', tag: '长辈友好 · 低中强度', q: '温和 养生 太极 椅子操 八段锦 跟练',
+    desc: '新增的温和合集：太极、椅子操、八段锦、拍打操、拉伸与冥想，整体低中强度，适合日常活动。涉及站姿或平衡的动作，反复眩晕者需扶稳或有人陪同。',
+    videos: [
+      { title: '24 式太极拳全套跟练', focus: '平衡 · 全身 · 缓慢柔和', minutes: 10, level: '适中', id: 'gentle-1', bv: 'BV1UPkhBuEXD', sourceTitle: '24式太极拳|全套跟练版 一招一式学太极', up: '太极拳教学', duration: 480, page: 1, checked: '2026-09-14', matchNote: '缓慢柔和的完整套路，提升平衡与协调；站姿较多，眩晕明显时改为坐姿观看或不跟练。时长以平台实际为准。' },
+      { title: '椅上健康操（60+）', focus: '坐姿 · 全身 · 防跌倒', minutes: 15, level: '入门', id: 'gentle-2', bv: 'BV1Lk8u6hEEM', sourceTitle: '给60+的爷爷奶奶的椅上健康操——练的好，不摔倒！', up: '银发健身', duration: 900, page: 1, checked: '2026-09-14', matchNote: '坐姿为主，含腿部伸展、脚踝活动、坐姿踏步与坐站练习；坐站动作起身要慢。时长以平台实际为准。' },
+      { title: '十五经络拍打操（口令版）', focus: '经络 · 拍打 · 全身', minutes: 15, level: '入门', id: 'gentle-3', bv: 'BV1fQftBtEfW', sourceTitle: '老中医|十五经络拍打操|带口令解读|自用跟练', up: '老中医', duration: 900, page: 1, checked: '2026-09-14', matchNote: '带口令的轻拍操，力度以舒服为准，不追求拍红拍痛。时长以平台实际为准。' },
+      { title: '八段锦完整版（呼吸口令）', focus: '舒展 · 呼吸 · 全身', minutes: 12, level: '入门', id: 'gentle-4', bv: 'BV1Z1rZBwEQ6', sourceTitle: '健身气功八段锦完整版-带呼吸法口令版', up: '健身气功', duration: 720, page: 1, checked: '2026-09-14', matchNote: '国家体育总局体系的八段锦，动作舒缓；个别蹲起动作膝盖不适可减小幅度。时长以平台实际为准。' },
+      { title: '坐姿全身训练 · 防跌倒', focus: '踝泵 · 核心 · 平衡', minutes: 10, level: '入门', id: 'gentle-5', bv: 'BV18URpBnEUE', sourceTitle: '坐姿全身训练——复健训练/有效预防老年人跌倒的舒缓锻炼', up: '康复操', duration: 600, page: 1, checked: '2026-09-14', matchNote: '坐姿与扶椅站姿结合，练脚踝力量与平衡；站姿部分需扶稳。时长以平台实际为准。' },
+      { title: '20 分钟温和解压拉伸', focus: '全身 · 放松 · 柔韧', minutes: 20, level: '适中', id: 'gentle-6', bv: 'BV1HhgZzCEBz', sourceTitle: '【舞蹈大师课|每日放松拉伸】20分钟温和解压、改善柔韧性', up: '舞蹈大师课', duration: 1200, page: 1, checked: '2026-09-14', matchNote: '偏舒缓的全身拉伸；幅度以微酸为准，不憋气不硬拉。时长以平台实际为准。' },
+      { title: '5 分钟运动前热身', focus: '激活 · 热身', minutes: 5, level: '入门', id: 'gentle-7', bv: 'BV1WK4y1G7Xk', sourceTitle: '5分钟运动前热身', up: '詹木丝儿fit', duration: 300, page: 1, checked: '2026-09-14', matchNote: '跟练前的轻激活；关节只有轻微牵拉感即可。时长以平台实际为准。' },
+      { title: '10 分钟运动后拉伸', focus: '放松 · 拉伸', minutes: 10, level: '入门', id: 'gentle-8', bv: 'BV169bQzuEHS', sourceTitle: '10分钟运动后拉伸', up: '朱七七Shara', duration: 600, page: 1, checked: '2026-09-14', matchNote: '活动后放松，慢拉伸、不弹振。时长以平台实际为准。' },
+      { title: '20 分钟躯体疗愈冥想', focus: '呼吸 · 放松 · 助眠', minutes: 20, level: '入门', id: 'gentle-9', bv: 'BV15HfDB7ETz', sourceTitle: '20分钟躯体疗愈冥想引导，安抚神经系统', up: '冥想引导', duration: 1200, page: 1, checked: '2026-09-14', matchNote: '躺着或坐着听引导即可，不是跟练动作；情绪或睡眠紧绷时合适。时长以平台实际为准。' }
+    ]
   }
 ];
 

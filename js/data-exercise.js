@@ -567,11 +567,91 @@ EX.courses = [
       { name: '臀桥（温和）', dur: 90, svg: 'bridge', target: '10 次 × 2 组', steps: ['仰卧屈膝，臀部发力把髋慢慢抬高，停 2 秒再放下。'], caution: '脖子和腰不要顶；做不到就小幅抬。' },
       { name: '扶稳提踵', dur: 90, svg: 'heelRaise', target: '12 次 × 2 组', steps: ['双手扶稳，脚跟慢慢抬起停 2 秒再落下。'], caution: '一定要扶稳；站不稳就改成坐姿抬脚跟。' }
     ]
+  },
+  {
+    id: 'kneecare',
+    name: '膝关节养护',
+    sub: '坐姿为主 · 不逞强、不疼痛',
+    icon: '🦵',
+    cls: 'l',
+    minutes: 8,
+    cat: 'part', tags: ['膝盖', '无器械', '低强度', '腿部'],
+    video: { bv: 'BV18URpBnEUE', title: '坐姿全身训练——预防老年人跌倒的舒缓锻炼', up: '康复操' },
+    items: [
+      { name: '坐姿伸膝', dur: 90, svg: 'kneeExtend', target: '每侧 12 次 × 2 组', steps: ['坐稳，一条腿慢慢伸直，停 2 秒，再慢慢放下。'], caution: '不锁死膝关节，不甩腿；膝盖不适就减小幅度。' },
+      { name: '卧位抬腿画圈', dur: 90, svg: 'bicycle', target: '1 分钟 × 2 组', steps: ['坐稳，双腿像蹬自行车一样缓慢交替画圈。'], caution: '动作慢、幅度小；膝盖不适就减小圈。' },
+      { name: '扶椅微蹲', dur: 90, svg: 'balance', target: '10 次 × 2 组', steps: ['双手扶稳椅背，膝盖微屈到舒服角度，停 2 秒再站直。'], caution: '不蹲太低、不憋气；站不稳就只做扶椅站立。' },
+      { name: '坐姿提踵', dur: 90, svg: 'heelRaise', target: '12 次 × 2 组', steps: ['坐稳，前脚掌不动，双脚跟缓慢抬起停 1 秒再放下。'], caution: '疼痛明显时减少次数或停止。' }
+    ]
+  },
+  {
+    id: 'sitrelax',
+    name: '久坐舒缓',
+    sub: '坐着就能做 · 肩颈与脚踝',
+    icon: '💺',
+    cls: 'w',
+    minutes: 6,
+    cat: 'posture', tags: ['久坐', '肩颈', '踝泵', '低强度'],
+    video: { bv: 'BV1HhgZzCEBz', title: '20分钟温和解压拉伸', up: '舞蹈大师课' },
+    items: [
+      { name: '坐姿扩胸', dur: 60, svg: 'chestStretch', target: '10 秒 × 4 次', steps: ['坐稳，双肩轻向后下方打开，胸口舒展到舒服即可。'], caution: '肩膀下沉，不憋气。' },
+      { name: '肩胛后缩', dur: 60, svg: 'shoulderSqueeze', target: '10 次 × 2 组', steps: ['两臂自然下垂，肩胛骨往中间夹，停 3 秒松开。'], caution: '不耸肩，脖子放松。' },
+      { name: '颈部温热', dur: 180, svg: 'hotpack', target: '3 分钟', steps: ['用 40~45℃ 热毛巾敷后颈与肩膀，温热舒服为准。'], caution: '皮肤感觉迟钝先用手腕内侧试温，避免烫伤；只热敷、不转动脖子。' },
+      { name: '坐姿踝泵', dur: 120, svg: 'anklePump', target: '15 次 × 3 组', steps: ['坐稳，脚尖慢慢上勾再下踩，在舒服范围反复。'], caution: '不追求幅度；一侧小腿突发肿痛、发热或变色，不要做并尽快就医。' }
+    ]
+  },
+  {
+    id: 'breathe',
+    name: '呼吸与放松',
+    sub: '几分钟把神经慢下来',
+    icon: '🌬️',
+    cls: 'w',
+    minutes: 5,
+    cat: 'quick', tags: ['呼吸', '放松', '助眠', '低强度'],
+    video: { bv: 'BV15HfDB7ETz', title: '20分钟躯体疗愈冥想引导', up: '冥想引导' },
+    items: [
+      { name: '腹式呼吸', dur: 120, svg: 'breath', target: '10 次', steps: ['一手放肚子，鼻吸 4 秒肚子鼓起，口呼 6 秒肚子收回。'], caution: '呼气比吸气长；头晕就放慢。' },
+      { name: '4-7-8 呼吸', dur: 120, svg: 'breath', target: '6 轮', steps: ['吸气 4 秒 → 屏气 7 秒 → 呼气 8 秒，做 6 轮。'], caution: '屏气不适就缩短或跳过，不勉强。' },
+      { name: '肩绕环', dur: 45, svg: 'shoulderRoll', target: '10 次 × 2 组', steps: ['两肩向后慢慢画圈，一圈约 3 秒。'], caution: '脖子放松不动。' },
+      { name: '搓手熨目', dur: 60, svg: 'palmEyes', target: '1 分钟', steps: ['两手搓热，轻扣双眼停留 30 秒，慢慢呼吸。'], caution: '手要干净，不要压眼球。' }
+    ]
+  },
+  {
+    id: 'balancecare',
+    name: '平衡防跌倒',
+    sub: '扶稳再练 · 反复眩晕者需有人陪同',
+    icon: '⚖️',
+    cls: 'w',
+    minutes: 8,
+    cat: 'balance', tags: ['平衡', '防跌倒', '扶稳', '低强度'],
+    video: { bv: 'BV18URpBnEUE', title: '坐姿全身训练——预防跌倒舒缓锻炼', up: '康复操' },
+    items: [
+      { name: '扶椅单脚站', dur: 60, svg: 'balance', target: '每侧 20 秒 × 2 组', steps: ['一手扶稳椅背，一条腿轻轻抬起 2~3 厘米，保持 20 秒换边。'], caution: '必须有扶的东西；头晕、站不稳立刻停下。' },
+      { name: '脚跟脚尖走', dur: 60, svg: 'walk', target: '15 秒 × 2 组', steps: ['沿一条直线，脚跟碰脚尖慢慢向前走。'], caution: '有人陪同或扶墙；眩晕明显不做。' },
+      { name: '坐站转换', dur: 90, svg: 'sitStand', target: '10 次 × 2 组', steps: ['坐无轮靠墙椅，用腿力站起再慢慢坐下。'], caution: '椅子靠墙不滑动；全程正常呼吸不憋气。' },
+      { name: '原地踏步', dur: 120, svg: 'march', target: '1 分钟', steps: ['原地慢踏步，手臂自然摆动，抬头平视。'], caution: '速度以能正常说话为准。' }
+    ]
+  },
+  {
+    id: 'nightstretch',
+    name: '睡前舒展',
+    sub: '把身体慢慢放下来',
+    icon: '🌙',
+    cls: 'w',
+    minutes: 7,
+    cat: 'scene', tags: ['睡前', '拉伸', '放松', '助眠'],
+    video: { bv: 'BV15HfDB7ETz', title: '20分钟躯体疗愈冥想引导', up: '冥想引导' },
+    items: [
+      { name: '体侧伸展', dur: 60, svg: 'sideStretch', target: '每侧 20 秒', steps: ['手臂过头向对侧慢慢侧弯，停 20 秒换边。'], caution: '不转头、不后仰。' },
+      { name: '靠墙抬腿', dur: 240, svg: 'legsUpWall', target: '3 分钟', steps: ['臀部靠墙，双腿贴墙竖起，全身放松慢慢呼吸。'], caution: '腿麻、腰痛、头晕立刻放下。' },
+      { name: '小腿抖动放松', dur: 60, svg: 'legShake', target: '1 分钟', steps: ['坐姿轻抬腿，轻轻抖动小腿放松 1 分钟。'], caution: '一侧小腿突发肿痛、发热或变色不要做，尽快就医。' },
+      { name: '搓手熨目', dur: 60, svg: 'palmEyes', target: '1 分钟', steps: ['两手搓热，轻扣双眼停留 30 秒，慢慢呼吸。'], caution: '手要干净，不要压眼球。' }
+    ]
   }
 ];
 
 /* 养护课程：在已复核的温和范围内开放更多，覆盖颈肩、腿部、膝盖、全身、晨起、饭后、体态、久坐、平衡。 */
-EX.courses = EX.courses.filter(c => ['neck', 'leg', 'knee', 'whole', 'activate', 'strength', 'morning', 'aftermeal', 'sleep', 'posture', 'office', 'waistback', 'balance'].includes(c.id));
+EX.courses = EX.courses.filter(c => ['neck', 'leg', 'knee', 'whole', 'activate', 'strength', 'morning', 'aftermeal', 'sleep', 'posture', 'office', 'waistback', 'balance', 'kneecare', 'sitrelax', 'breathe', 'balancecare', 'nightstretch'].includes(c.id));
 
 /* 课程分类 */
 EX.cats = [

@@ -881,14 +881,17 @@ function fitCollectionCard(col) {
 function fitVideoCard(v, first) {
   const duration = Math.floor(v.duration / 60) + ':' + String(v.duration % 60).padStart(2, '0');
   const highRisk = v.level === '进阶' || /瑜伽|高低肩|直角肩|瘦小腿|下半身体态|沙漏腰/.test(`${v.name || ''}${v.focus || ''}`);
+  const lvlClass = v.level === '进阶' ? 'r' : v.level === '适中' ? 'o' : 'g';
+  const lvlText = v.level === '进阶' ? '高强度' : v.level === '适中' ? '中强度' : '低强度';
+  const lvlBadge = `<span class="tag ${lvlClass}" style="margin-left:4px">${lvlText}</span>`;
   return `<section class="acc fit-video-card ${first ? 'open' : ''}" data-acc data-fit-id="${escAttr(v.id)}" ${v.original ? 'data-restored-fit' : ''}>
-    <button class="acc-h"><span class="aico">${icon('play')}</span><span style="flex:1;min-width:0">${escAttr(v.name)}${highRisk ? ' <span class="tag r">先问医生</span>' : ''}<span class="fit-meta">${escAttr(v.focus)} · 全片 ${duration}${v.original ? ` · 原标注 ${v.minutes} 分钟` : ''}</span></span><span class="arw">›</span></button>
+    <button class="acc-h"><span class="aico">${icon('play')}</span><span style="flex:1;min-width:0">${escAttr(v.name)}${lvlBadge}${highRisk ? ' <span class="tag r">强度偏高·先问医生</span>' : ''}<span class="fit-meta">${escAttr(v.focus)} · 全片 ${duration}${v.original ? ` · 原标注 ${v.minutes} 分钟` : ''}</span></span><span class="arw">›</span></button>
     <div class="acc-b">
       <p>${escAttr(v.desc)}</p>
       <p class="fit-caution"><b>跟练前：</b>${escAttr(v.caution)}</p>
       <div class="video-heading"><b>${escAttr(v.format)}</b><span>默认不自动播放</span></div>
       <div class="video-stage" data-player-src="https://player.bilibili.com/player.html?bvid=${v.bv}&page=1&autoplay=0&danmaku=0" data-player-title="${escAttr(v.name)}" data-fit-risk="${highRisk ? 'high' : 'standard'}">
-        <button class="video-load" data-act="loadfit">${highRisk ? '确认后查看视频' : '加载跟练视频'}<span>在本页播放，需要联网；加载后会连接哔哩哔哩</span></button>
+        <button class="video-load" data-act="loadfit">${highRisk ? '加载跟练视频（强度偏高）' : '加载跟练视频'}<span>在本页播放，需要联网；加载后会连接哔哩哔哩</span></button>
       </div>
       <div class="fit-player-actions"><button class="btn ghost sm" data-act="stopfit">停止并收起</button><button class="btn ghost sm" data-act="retryfit">重新加载</button></div>
       <p class="video-note">来源：哔哩哔哩 · 上传者 ${escAttr(v.up)}<br>原片：${escAttr(v.title)}</p>
@@ -922,7 +925,7 @@ function renderMove() {
     html += (typeof FIT_COLLECTIONS !== 'undefined' ? FIT_COLLECTIONS : []).map(fitCollectionCard).join('');
     html += `<h2 class="fit-extra-heading">补充：可在本页播放</h2>`;
     html += (typeof FIT_VIDEOS !== 'undefined' ? FIT_VIDEOS : []).map(v => fitVideoCard(v, false)).join('');
-    html += `<div class="note">原有条目均已保留；涉及颈部转动、后仰、抗阻或高强度的内容，需先由专业人员判断是否适用，不因“护膝”“低冲击”等标题自行判断。课程页图文动作与视频库独立，不作一一配套。</div>`;
+    html += `<div class="note">原有条目均已保留；涉及颈部转动、后仰、抗阻或高强度的内容，需先由专业人员判断是否适用，不因"护膝""低冲击"等标题自行判断。课程页图文动作与视频库独立，不作一一配套。视频强度以标签标明（低/中/高），高强度仅作提示、不限制播放，是否跟练请结合自身情况。</div>`;
   }
 
   /* ---------- 作息 ---------- */
@@ -965,7 +968,7 @@ function renderExercise() { renderMove(); }
 function renderCare() { renderMove(); }
 
 /* ================= 课程卡片 ================= */
-const COURSE_PHOTO = { neck: 'chair', leg: 'walk', whole: 'walk', morning: 'window-light', aftermeal: 'table', posture: 'chair', activate: 'walk', balance: 'walk', office: 'chair', waistback: 'chair', knee: 'chair', sleep: 'window-light', strength: 'chair' };
+const COURSE_PHOTO = { neck: 'chair', leg: 'walk', whole: 'walk', morning: 'window-light', aftermeal: 'table', posture: 'chair', activate: 'walk', balance: 'walk', office: 'chair', waistback: 'chair', knee: 'chair', sleep: 'window-light', strength: 'chair', kneecare: 'chair', sitrelax: 'chair', breathe: 'window-light', balancecare: 'walk', nightstretch: 'window-light' };
 function courseCard(cs) {
   const done = (S.logs || []).some(l => l.d === today() && l.t === cs.id);
   const needsApproval = ['whole','activate','strength','balance'].includes(cs.id);
@@ -1194,9 +1197,9 @@ function collectForm() {
 
 function loadFitVideo(stage) {
   if (!stage || !exerciseReady()) return;
-  if (stage.dataset.fitRisk === 'high' && !P0().exerciseApproved) {
-    toast('该视频强度较高；档案中尚未记录医生或康复师确认，暂不加载', 4200);
-    return;
+  if (stage.dataset.fitRisk === 'high') {
+    /* 超强度不限制播放，仅做强度提示（按需求：不阻断、只提醒） */
+    toast('强度提示：该视频强度偏高。请先看示范、量力而行；出现头晕、疼痛或胸闷立即停止，不追求跟满全程。', 4800);
   }
   loadCookingVideo(stage);
 }
