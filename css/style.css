@@ -289,8 +289,11 @@ img{display:block}
 .vmodal-open{display:block;text-align:center;padding:12px;color:#7FC5A3;font-size:.88rem;background:#16211C}
 .vmodal:fullscreen{background:#000}
 .vmodal:fullscreen .vframe iframe{width:100%;height:100%}
-/* iOS 等不支持标准全屏 API 时的 CSS 兜底：浮层铺满视口 */
+/* 全屏兜底：浮层铺满视口、隐藏底部说明与「原平台打开」，让视频占满整屏。
+   不依赖系统 Fullscreen API，因此在华为 / 微信 X5 / 老安卓 WebView 等环境下都能稳定生效。 */
 .vmodal.css-fs{position:fixed;inset:0;z-index:2147483647;background:#000}
+.vmodal.css-fs .vmodal-tip{display:none}
+.vmodal.css-fs .vmodal-open{display:none}
 .vmodal.css-fs .vframe iframe{width:100%;height:100%}
 body.noscroll{overflow:hidden}
 

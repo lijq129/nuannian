@@ -160,6 +160,15 @@ const noSrc = ev('(function(){openDyVideo("","x");const f=document.querySelector
 log('未配置ID时不挂播放器', noSrc === '');
 ev('closeVideo();');
 
+// 5d) 跟练视频「放大」按钮：加载后出现，点击切换 css-fs 兜底全屏（华为 / 微信 X5 可用）
+ev('moveTab="video"; go("move");');
+ev('S.healthChecks=S.healthChecks||{}; S.healthChecks[today()]={status:"clear",symptom:"",updatedAt:""};');
+const fsLoad = ev('(function(){const c=document.querySelector("#move-body .fit-video-card");if(!c)return "no-card";const st=c.querySelector(".video-stage");if(!st)return "no-stage";loadFitVideo(st);const b=document.querySelector(".video-stage .stage-fs-btn");return b?"has-btn":"no-btn";})()');
+log('跟练视频加载后出现「放大」按钮', fsLoad === 'has-btn');
+const fsToggle = ev('(function(){const c=document.querySelector("#move-body .fit-video-card");const st=c.querySelector(".video-stage");const b=st.querySelector(".stage-fs-btn");b.click();const on=st.classList.contains("css-fs");b.click();const off=!st.classList.contains("css-fs");return on&&off;})()');
+log('「放大」按钮可切换全屏兜底(css-fs)', fsToggle === true);
+ev('closeVideo();');
+
 // 6) 菜谱中西面点分类
 const cats = ev('(function(){document.querySelector("[data-act=\\"dtab\\"][data-t=\\"recipe\\"]").click();return [...document.querySelectorAll("[data-act=\\"rcat\\"]")].map(c=>c.dataset.t);})()');
 log('菜谱含中西面点分类', cats.includes('中式面点') && cats.includes('西式面点'));

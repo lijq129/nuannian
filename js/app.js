@@ -400,7 +400,13 @@ function cookingVideoHTML(name, info, ready = false) {
   </section>`;
 }
 function stopCookingVideos(root = document) {
-  root.querySelectorAll('.video-stage iframe').forEach(frame => { frame.parentElement.querySelector('button').hidden = false; frame.remove(); });
+  root.querySelectorAll('.video-stage iframe').forEach(frame => {
+    const parent = frame.parentElement;
+    const lb = parent.querySelector('.video-load'); if (lb) lb.hidden = false;
+    const fb = parent.querySelector('.stage-fs-btn'); if (fb) fb.remove();
+    parent.classList.remove('has-video');
+    frame.remove();
+  });
 }
 function loadCookingVideo(stage) {
   if (!stage || stage.querySelector('iframe')) return;
@@ -410,8 +416,16 @@ function loadCookingVideo(stage) {
   frame.title = stage.dataset.playerTitle;
   frame.allow = 'fullscreen; picture-in-picture';
   frame.allowFullscreen = true;
+  frame.setAttribute('webkitallowfullscreen', 'true');
   frame.referrerPolicy = 'strict-origin-when-cross-origin';
-  stage.querySelector('button').hidden = true;
+  const lb = stage.querySelector('.video-load'); if (lb) lb.hidden = true;
+  if (!stage.querySelector('.stage-fs-btn')) {
+    const b = document.createElement('button');
+    b.className = 'stage-fs-btn'; b.dataset.act = 'stagefs'; b.type = 'button';
+    b.setAttribute('aria-label', '全屏放大'); b.textContent = '放大';
+    stage.appendChild(b);
+  }
+  stage.classList.add('has-video');
   stage.appendChild(frame);
 }
 
@@ -1307,7 +1321,7 @@ function preScreenToast(tag) {
 function openVideo(bv, title) {
   if (!bv) { toast('暂时没有可用视频'); return; }
   const f = $('#vm-frame');
-  if (f) { f.classList.remove('dy'); f.innerHTML = `<iframe src="https://player.bilibili.com/player.html?bvid=${bv}&page=1&high_quality=1&danmaku=0" scrolling="no" framespacing="0" allowfullscreen="true" allow="fullscreen; picture-in-picture" referrerpolicy="no-referrer"></iframe>`; }
+  if (f) { f.classList.remove('dy'); f.innerHTML = `<iframe src="https://player.bilibili.com/player.html?bvid=${bv}&page=1&high_quality=1&danmaku=0" scrolling="no" framespacing="0" allowfullscreen="true" webkitallowfullscreen="true" allow="fullscreen; picture-in-picture" referrerpolicy="no-referrer"></iframe>`; }
   const t = $('#vm-title'); if (t) t.textContent = title || '真人教练视频 · 点击即可观看';
   const o = $('#vm-open'); if (o) o.href = 'https://www.bilibili.com/video/' + bv;
   const m = $('#vmodal'); if (m) m.classList.remove('hidden');
@@ -1318,7 +1332,7 @@ function openDyVideo(vid, title, url) {
   if (f) {
     if (vid) {
       f.classList.add('dy');
-      f.innerHTML = `<iframe src="https://open.douyin.com/player/video?vid=${encodeURIComponent(vid)}&autoplay=0" scrolling="no" frameborder="0" referrerpolicy="unsafe-url" allowfullscreen allow="fullscreen; picture-in-picture"></iframe>`;
+      f.innerHTML = `<iframe src="https://open.douyin.com/player/video?vid=${encodeURIComponent(vid)}&autoplay=0" scrolling="no" frameborder="0" referrerpolicy="unsafe-url" allowfullscreen webkitallowfullscreen allow="fullscreen; picture-in-picture"></iframe>`;
     } else {
       f.classList.remove('dy'); f.innerHTML = '';
     }
@@ -1340,21 +1354,23 @@ function toggleVideoFullscreen() {
   if (!m) return;
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
-  if (fsEl) { if (exit) exit.call(document); return; }
-  /* 已处于 CSS 兜底全屏 → 退出 */
-  if (m.classList.contains('css-fs')) {
-    m.classList.remove('css-fs'); document.body.classList.remove('noscroll'); syncVmodalFs(); return;
+  const on = !!(fsEl || (m.classList.contains('css-fs')));
+  if (on) {
+    /* 退出：系统级全屏与 CSS 兜底都撤掉 */
+    if (fsEl && exit) { try { exit.call(document); } catch (e) {} }
+    m.classList.remove('css-fs');
+    document.body.classList.remove('noscroll');
+    syncVmodalFs();
+    return;
   }
+  /* 进入：优先用「CSS 兜底全屏」——由父页面把浮层铺满整个视口、隐藏顶/底多余元素，
+     不依赖系统 Fullscreen API，因此在华为 / 微信 X5 / 老安卓 WebView 等环境下都能稳定生效；
+     若浏览器支持真正的系统全屏（可隐藏系统状态栏），再并行尝试一次作为增强。 */
+  m.classList.add('css-fs');
+  document.body.classList.add('noscroll');
+  syncVmodalFs();
   const req = m.requestFullscreen || m.webkitRequestFullscreen || m.mozRequestFullScreen || m.msRequestFullscreen;
-  if (!req) {
-    /* iOS 等不支持标准全屏 API：用 CSS 把浮层铺满视口做兜底；
-       播放器自带的右下角全屏按钮（已通过 allow="fullscreen" 放开）仍可触发真全屏。 */
-    m.classList.add('css-fs'); document.body.classList.add('noscroll'); syncVmodalFs(); return;
-  }
-  try {
-    const p = req.call(m);
-    if (p && p.catch) p.catch(() => { m.classList.add('css-fs'); document.body.classList.add('noscroll'); syncVmodalFs(); });
-  } catch (e) { m.classList.add('css-fs'); document.body.classList.add('noscroll'); syncVmodalFs(); }
+  if (req) { try { const p = req.call(m); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
 }
 function syncVmodalFs() {
   const b = document.getElementById('vm-fs');
@@ -1365,9 +1381,37 @@ function syncVmodalFs() {
   b.textContent = on ? '退出' : '放大';
   b.setAttribute('aria-pressed', String(on));
 }
-document.addEventListener('fullscreenchange', syncVmodalFs);
-document.addEventListener('webkitfullscreenchange', syncVmodalFs);
-document.addEventListener('mozfullscreenchange', syncVmodalFs);
+function syncStageFs(stage) {
+  if (!stage) return;
+  const b = stage.querySelector('.stage-fs-btn'); if (!b) return;
+  const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement || stage.classList.contains('css-fs'));
+  b.textContent = on ? '退出' : '放大';
+  b.setAttribute('aria-label', on ? '退出全屏' : '全屏放大');
+}
+function syncAllFs() { syncVmodalFs(); document.querySelectorAll('.video-stage.css-fs').forEach(syncStageFs); }
+document.addEventListener('fullscreenchange', syncAllFs);
+document.addEventListener('webkitfullscreenchange', syncAllFs);
+document.addEventListener('mozfullscreenchange', syncAllFs);
+/* 跟练 / 烹饪视频内嵌播放器的「放大」：与 vmodal 同思路——以 CSS 兜底全屏为主，
+   不依赖系统 Fullscreen API，在华为 / 微信 X5 / 老安卓 WebView 上也能稳定铺满整屏。 */
+function toggleStageFullscreen(stage) {
+  if (!stage) return;
+  const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
+  const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+  const on = !!(fsEl || stage.classList.contains('css-fs'));
+  if (on) {
+    if (fsEl && exit) { try { exit.call(document); } catch (e) {} }
+    stage.classList.remove('css-fs');
+    if (!document.querySelector('.vmodal.css-fs') && !document.querySelector('.video-stage.css-fs')) document.body.classList.remove('noscroll');
+    syncStageFs(stage);
+    return;
+  }
+  stage.classList.add('css-fs');
+  document.body.classList.add('noscroll');
+  syncStageFs(stage);
+  const req = stage.requestFullscreen || stage.webkitRequestFullscreen || stage.mozRequestFullScreen || stage.msRequestFullscreen;
+  if (req) { try { const p = req.call(stage); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
+}
 
 /* ================= 事件委托 ================= */
 document.addEventListener('click', e => {
@@ -1377,6 +1421,7 @@ document.addEventListener('click', e => {
   if (a === 'swrefresh') { if (window.__applySWUpdate) window.__applySWUpdate(); return; }
   if (a === 'swclose') { const b = $('#update-banner'); if (b) b.classList.add('hidden'); return; }
   if (a === 'vmfs') { toggleVideoFullscreen(); return; }
+  if (a === 'stagefs') { toggleStageFullscreen(el.closest('.video-stage')); return; }
   if (a === 'checkupdate') {
     toast('正在检查更新…');
     if (!('serviceWorker' in navigator)) { toast('当前环境不支持自动更新'); return; }

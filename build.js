@@ -13,7 +13,7 @@ const DIST = path.join(ROOT, 'dist');
 // 需要同步进 dist/ 的顶层条目（不碰 scripts/ qa/ .workbuddy/ node_modules/.git）
 const ENTRIES = ['index.html', 'manifest.json', 'service-worker.js', 'css', 'js', 'assets'];
 function rootIcons() {
-  return fs.readdirSync(ROOT).filter(f => /^icon.*\.(svg|png)$/i.test(f));
+  return fs.readdirSync(ROOT).filter(f => /^(icon|apple-touch-icon).*\.(svg|png)$/i.test(f));
 }
 
 function rmrf(p) {

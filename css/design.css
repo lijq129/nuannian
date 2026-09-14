@@ -177,6 +177,13 @@ h1,h2,h3,h4,p { overflow-wrap:anywhere; } h1,h2,h3,h4,b,strong { font-weight:600
 .fit-player-actions a { color:var(--brand); padding:10px 0; text-underline-offset:4px; }
 .fit-video-card .video-note { color:var(--ink2); font-size:.8rem; line-height:1.8; overflow-wrap:anywhere; }
 .video-stage iframe { display:block; width:100%; height:100%; border:0; position:absolute; inset:0; }
+/* 内嵌视频（跟练 / 烹饪）的「放大」按钮：以 CSS 兜底全屏为主，不依赖系统 Fullscreen API，
+   因此在华为 / 微信 X5 / 老安卓 WebView 上也能稳定铺满整屏。 */
+.video-stage .stage-fs-btn { position:absolute; top:8px; right:8px; z-index:3; height:34px; padding:0 12px; border:0; border-radius:10px; background:rgba(0,0,0,.55); color:#fff; font-size:.85rem; font-weight:700; display:none; align-items:center; justify-content:center; }
+.video-stage.has-video .stage-fs-btn { display:inline-flex; }
+.video-stage.css-fs { position:fixed; inset:0; z-index:2147483647; background:#000; border-radius:0; overflow:hidden; }
+.video-stage.css-fs .stage-fs-btn { top:calc(8px + env(safe-area-inset-top)); right:8px; }
+.video-stage.css-fs iframe { width:100%; height:100%; }
 .video-load { position:absolute; inset:0; width:100%; border:0; background:transparent; color:#fff; font:inherit; cursor:pointer; }
 .video-load[hidden] { display:none; }
 .video-load span { display:block; font-size:.8rem; margin-top:8px; color:#F0E4D6; }
