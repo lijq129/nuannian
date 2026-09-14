@@ -1,6 +1,7 @@
 const CACHE = 'nuannian-shell-v072-mobile';
 const SHELL = [
-  './', './index.html', './manifest.json', './icon.svg', './icon-180.png', './icon-192.png', './icon-512.png',
+  './', './index.html', './manifest.json',
+  './icon.svg?v=2', './icon-180.png?v=2', './icon-192.png?v=2', './icon-512.png?v=2',
   './css/style.css', './css/design.css',
   './js/data-exercise.js', './js/data-care.js', './js/data-core.js', './js/data-diet.js',
   './js/data-recipes-extra.js', './js/data-dish.js', './js/data-video.js', './js/data-fit-video.js',

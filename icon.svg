@@ -1,35 +1,21 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="暖年 · 每日养护">
   <defs>
-    <linearGradient id="bg" x1="120" y1="40" x2="400" y2="480" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFC27C"/>
-      <stop offset="0.5" stop-color="#FB8E4B"/>
-      <stop offset="1" stop-color="#ED6C2E"/>
+    <linearGradient id="bg" x1="0.2" y1="0" x2="0.85" y2="1">
+      <stop offset="0" stop-color="#FDFBF7"/>
+      <stop offset="1" stop-color="#F0E6D8"/>
     </linearGradient>
-    <radialGradient id="glow" cx="180" cy="150" r="260" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.35"/>
-      <stop offset="0.55" stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
-    <linearGradient id="food" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#FFEFD9"/>
-      <stop offset="1" stop-color="#FFD9B0"/>
+    <linearGradient id="ribbon" x1="0" y1="1" x2="1" y2="0">
+      <stop offset="0" stop-color="#DC5C26"/>
+      <stop offset="0.5" stop-color="#FB8E4B"/>
+      <stop offset="1" stop-color="#F8C6A2"/>
+    </linearGradient>
+    <linearGradient id="leaf" x1="0.1" y1="0" x2="0.9" y2="1">
+      <stop offset="0" stop-color="#73907A"/>
+      <stop offset="1" stop-color="#2B5945"/>
     </linearGradient>
   </defs>
-
-  <rect width="512" height="512" rx="116" fill="url(#bg)"/>
-  <rect width="512" height="512" rx="116" fill="url(#glow)"/>
-
-  <!-- 升腾的热气 -->
-  <g fill="none" stroke="#FFFFFF" stroke-width="16" stroke-linecap="round" opacity="0.92">
-    <path d="M222 250 C204 228 240 212 222 190 C208 172 238 156 226 138"/>
-    <path d="M290 250 C308 228 272 212 290 190 C304 172 274 156 286 138"/>
-  </g>
-
-  <!-- 碗体 -->
-  <path d="M150 292 C150 372 362 372 362 292 Z" fill="#FFFFFF"/>
-  <!-- 碗内食物 -->
-  <ellipse cx="256" cy="292" rx="106" ry="28" fill="url(#food)"/>
-  <!-- 碗口边 -->
-  <ellipse cx="256" cy="292" rx="106" ry="28" fill="none" stroke="#FFFFFF" stroke-opacity="0.85" stroke-width="5"/>
-  <!-- 碗足 -->
-  <path d="M214 360 Q256 386 298 360" fill="none" stroke="#FFFFFF" stroke-width="13" stroke-linecap="round" opacity="0.9"/>
+  <rect width="512" height="512" rx="118" ry="118" fill="url(#bg)"/>
+  <path d="M168 392 L168 176 M168 176 L312 392 M312 392 L312 176"
+        fill="none" stroke="url(#ribbon)" stroke-width="74" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M356 152 C436 192 452 300 372 400 C342 322 336 228 356 152 Z" fill="url(#leaf)"/>
 </svg>
