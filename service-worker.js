@@ -10,7 +10,12 @@ const SHELL = [
 ];
 
 self.addEventListener('install', event => {
-  event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
+  /* 逐个添加，允许个别资源失败：避免部署过渡期某资源临时 404 导致整个 SW 安装失败、更新被卡住。 */
+  event.waitUntil(
+    caches.open(CACHE)
+      .then(cache => Promise.all(SHELL.map(u => cache.add(u).catch(() => null))))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', event => {
