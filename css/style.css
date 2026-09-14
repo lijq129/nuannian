@@ -289,6 +289,10 @@ img{display:block}
 .vmodal-open{display:block;text-align:center;padding:12px;color:#7FC5A3;font-size:.88rem;background:#16211C}
 .vmodal:fullscreen{background:#000}
 .vmodal:fullscreen .vframe iframe{width:100%;height:100%}
+/* iOS 等不支持标准全屏 API 时的 CSS 兜底：浮层铺满视口 */
+.vmodal.css-fs{position:fixed;inset:0;z-index:2147483647;background:#000}
+.vmodal.css-fs .vframe iframe{width:100%;height:100%}
+body.noscroll{overflow:hidden}
 
 /* ============ 底部导航 ============ */
 .tabbar{position:fixed;bottom:0;left:0;right:0;max-width:520px;margin:0 auto;z-index:60;

@@ -1307,7 +1307,7 @@ function preScreenToast(tag) {
 function openVideo(bv, title) {
   if (!bv) { toast('暂时没有可用视频'); return; }
   const f = $('#vm-frame');
-  if (f) { f.classList.remove('dy'); f.innerHTML = `<iframe src="https://player.bilibili.com/player.html?bvid=${bv}&page=1&high_quality=1&danmaku=0" scrolling="no" framespacing="0" allowfullscreen="true" referrerpolicy="no-referrer"></iframe>`; }
+  if (f) { f.classList.remove('dy'); f.innerHTML = `<iframe src="https://player.bilibili.com/player.html?bvid=${bv}&page=1&high_quality=1&danmaku=0" scrolling="no" framespacing="0" allowfullscreen="true" allow="fullscreen; picture-in-picture" referrerpolicy="no-referrer"></iframe>`; }
   const t = $('#vm-title'); if (t) t.textContent = title || '真人教练视频 · 点击即可观看';
   const o = $('#vm-open'); if (o) o.href = 'https://www.bilibili.com/video/' + bv;
   const m = $('#vmodal'); if (m) m.classList.remove('hidden');
@@ -1330,7 +1330,8 @@ function openDyVideo(vid, title, url) {
 }
 function closeVideo() {
   const f = $('#vm-frame'); if (f) { f.innerHTML = ''; f.classList.remove('dy'); }
-  const m = $('#vmodal'); if (m) m.classList.add('hidden');
+  const m = $('#vmodal'); if (m) { m.classList.add('hidden'); m.classList.remove('css-fs'); }
+  document.body.classList.remove('noscroll');
 }
 /* 安卓微信等 X5 内核里，跨域 iframe 自带的「全屏」按钮经常被静默拦截，
    因此在父页面（同源）提供一个可靠的「放大」按钮：由父页面请求全屏。 */
@@ -1340,17 +1341,27 @@ function toggleVideoFullscreen() {
   const fsEl = document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement;
   const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
   if (fsEl) { if (exit) exit.call(document); return; }
+  /* 已处于 CSS 兜底全屏 → 退出 */
+  if (m.classList.contains('css-fs')) {
+    m.classList.remove('css-fs'); document.body.classList.remove('noscroll'); syncVmodalFs(); return;
+  }
   const req = m.requestFullscreen || m.webkitRequestFullscreen || m.mozRequestFullScreen || m.msRequestFullscreen;
-  if (!req) { toast('当前浏览器不支持全屏，可点「在原平台打开」'); return; }
+  if (!req) {
+    /* iOS 等不支持标准全屏 API：用 CSS 把浮层铺满视口做兜底；
+       播放器自带的右下角全屏按钮（已通过 allow="fullscreen" 放开）仍可触发真全屏。 */
+    m.classList.add('css-fs'); document.body.classList.add('noscroll'); syncVmodalFs(); return;
+  }
   try {
     const p = req.call(m);
-    if (p && p.catch) p.catch(() => toast('当前环境不支持全屏，可点「在原平台打开」'));
-  } catch (e) { toast('当前环境不支持全屏，可点「在原平台打开」'); }
+    if (p && p.catch) p.catch(() => { m.classList.add('css-fs'); document.body.classList.add('noscroll'); syncVmodalFs(); });
+  } catch (e) { m.classList.add('css-fs'); document.body.classList.add('noscroll'); syncVmodalFs(); }
 }
 function syncVmodalFs() {
   const b = document.getElementById('vm-fs');
   if (!b) return;
-  const on = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  const realFs = !!(document.fullscreenElement || document.webkitFullscreenElement || document.mozFullScreenElement);
+  const cssFs = document.getElementById('vmodal') && document.getElementById('vmodal').classList.contains('css-fs');
+  const on = realFs || cssFs;
   b.textContent = on ? '退出' : '放大';
   b.setAttribute('aria-pressed', String(on));
 }

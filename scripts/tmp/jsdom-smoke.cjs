@@ -79,17 +79,18 @@ log('首页含「短时走动」', ht.includes('短时走动'));
 // 3b) 合并页子页结构：已去除 今日 / 部位养护 / 四季；课程已扩充；含跟练视频
 ev('moveTab="course"; go("move");');
 const chips = ev('[...document.querySelectorAll("#move-body .chips.mtab .chip")].map(c=>c.textContent)');
-log('合并页子页含 课程/视频/作息/安全须知', ['课程','视频','作息','安全须知'].every(t=>chips.includes(t)));
+log('合并页子页含 课程/跟练视频/作息/安全须知', ['课程','跟练视频','作息','安全须知'].every(t=>chips.includes(t)));
 log('已去除「今日」子页', !chips.includes('今日'));
 log('已去除「部位养护」', !chips.includes('部位养护'));
 log('已去除「四季」', !chips.includes('四季'));
 const courseCount = ev('EX.courses.length');
 log('养护课程已扩充(>=12)', courseCount >= 12);
 ev('moveTab="course"; go("move");');
-const hasVideoBtn = ev('!!document.querySelector("#move-body .course-card [data-act=\\"coursevideo\\"]")');
-log('课程含跟练视频按钮', hasVideoBtn);
-const vidBv = ev('(function(){const b=document.querySelector("#move-body .course-card [data-act=\\"coursevideo\\"]");return b?EX.courses.find(c=>c.id===b.dataset.id).video.bv:null;})()');
-log('跟练视频含 BV 号', typeof vidBv==='string' && vidBv.indexOf('BV')===0);
+const hasStart = ev('!!document.querySelector("#move-body .course-card [data-act=\\"start\\"]")');
+log('课程卡片含开始练习入口', hasStart);
+// 课程卡已不再内嵌视频按钮（视频统一在「跟练视频」页，data-act=loadfit）；BV 校验改查合集数据
+const bvCount = ev('FIT_COLLECTIONS.reduce((n,c)=>n+c.videos.filter(v=>typeof v.bv==="string"&&v.bv.indexOf("BV")===0).length,0)');
+log('跟练视频含 BV 号', typeof bvCount==='number' && bvCount > 0);
 
 // 3c) 点击「开始练习」直接进入播放器，不再阻塞确认框
 ev('moveTab="course"; go("move");');
@@ -144,9 +145,9 @@ log('视频页含博主「欧阳春晓」', vt.includes('欧阳春晓'));
 log('视频页含低冲击合集', vt.includes('低冲击'));
 const colCount = ev('document.querySelectorAll("#move-body .fitcol").length');
 log('视频合集数量>=3', colCount >= 3);
-const rowCount = ev('document.querySelectorAll("#move-body .fitrow").length');
+const rowCount = ev('document.querySelectorAll("#move-body .fit-video-card").length');
 log('视频条目>=10', rowCount >= 10);
-const playable = ev('document.querySelectorAll("#move-body .fitrow [data-act=\\"fitvideo\\"], #move-body .fitrow [data-act=\\"dyfind\\"]").length');
+const playable = ev('document.querySelectorAll("#move-body .fit-video-card [data-act=\\"loadfit\\"]").length');
 log('每条视频都有播放/跳转入口', rowCount > 0 && playable === rowCount);
 // 抖音官方播放器（站内嵌入）URL 正确
 const dySrc = ev('(function(){openDyVideo("7123456789012345678","测试");const f=document.querySelector("#vm-frame iframe");return f?f.getAttribute("src"):"";})()');
