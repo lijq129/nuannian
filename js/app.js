@@ -554,7 +554,7 @@ function renderHome() {
         <h1 class="hi">${greet()}，${escapeHTML(p.name)}</h1>
         <div class="dt">吃好一点，动一动，<br>把今天过得松快些。</div>
       </div>
-      <img class="hero-photo" src="assets/photos/hero-cartoon.png" alt="晨光下开心舒展的卡通人物" width="1024" height="1536">
+      <img class="hero-photo" src="assets/photos/hero-cartoon.webp" alt="晨光下开心舒展的卡通人物" width="733" height="1100">
     </div>
   </div>
     <div class="search"><input type="search" id="q" aria-label="搜索菜谱、课程、养护知识" placeholder="搜索菜谱、课程、养护知识" value="${escapeHTML(q)}"></div>
@@ -1571,7 +1571,7 @@ function showOnboarding() {
   root.className = 'onboard';
   root.innerHTML =
     '<div class="ob-card">' +
-      '<div class="ob-art"><img src="assets/photos/hero-cartoon.png" alt="暖年卡通形象"></div>' +
+      '<div class="ob-art"><img src="assets/photos/hero-cartoon.webp" alt="暖年卡通形象"></div>' +
       '<div class="ob-brand">暖年</div>' +
       '<div class="ob-track">' + slides.map((s, i) =>
         '<div class="ob-slide' + (i === 0 ? ' on' : '') + '" data-i="' + i + '">' +
