@@ -186,6 +186,19 @@ h1,h2,h3,h4,p { overflow-wrap:anywhere; } h1,h2,h3,h4,b,strong { font-weight:600
 .video-stage.css-fs { position:fixed; inset:0; z-index:2147483647; background:#000; border-radius:0; overflow:hidden; }
 .video-stage.css-fs .stage-fs-btn { top:calc(8px + env(safe-area-inset-top)); right:8px; }
 .video-stage.css-fs iframe { width:100%; height:100%; }
+/* 横屏方向（或已锁定横屏）：视频铺满整屏，实现横屏全屏观看 */
+@media (orientation: landscape) {
+  .video-stage.css-fs iframe { width:100vw; height:100vh; }
+}
+/* 竖屏手持时：把横视频放大到占满屏幕高度、左右裁切，呈现横屏观看效果 */
+@media (orientation: portrait) {
+  .video-stage.css-fs { display:flex; align-items:center; justify-content:center; }
+  .video-stage.css-fs iframe {
+    position:absolute; top:50%; left:50%;
+    height:100vh; width:calc(100vh * 16 / 9);
+    transform:translate(-50%,-50%);
+  }
+}
 .video-load { position:absolute; inset:0; width:100%; border:0; background:transparent; color:#fff; font:inherit; cursor:pointer; }
 .video-load[hidden] { display:none; }
 .video-load span { display:block; font-size:.8rem; margin-top:8px; color:#F0E4D6; }

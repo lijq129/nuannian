@@ -295,6 +295,19 @@ img{display:block}
 .vmodal.css-fs .vmodal-tip{display:none}
 .vmodal.css-fs .vmodal-open{display:none}
 .vmodal.css-fs .vframe iframe{width:100%;height:100%}
+/* 横屏方向（或已锁定横屏）：视频铺满整屏，实现横屏全屏观看 */
+@media (orientation: landscape) {
+  .vmodal.css-fs .vframe iframe { width:100vw; height:100vh; }
+}
+/* 竖屏手持时：把横视频放大到占满屏幕高度、左右裁切，呈现横屏观看效果 */
+@media (orientation: portrait) {
+  .vmodal.css-fs .vframe { display:flex; align-items:center; justify-content:center; }
+  .vmodal.css-fs .vframe iframe {
+    position:absolute; top:50%; left:50%;
+    height:100vh; width:calc(100vh * 16 / 9);
+    transform:translate(-50%,-50%);
+  }
+}
 body.noscroll{overflow:hidden}
 
 /* ============ 底部导航 ============ */

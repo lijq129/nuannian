@@ -1369,6 +1369,22 @@ function closeVideo() {
   const m = $('#vmodal'); if (m) { m.classList.add('hidden'); m.classList.remove('css-fs'); }
   document.body.classList.remove('noscroll');
 }
+/* 尝试锁定横屏（landscape），让点开「放大」即横屏全屏观看。
+   华为 / Chrome 等支持 screen.orientation.lock 的环境会立即转横；
+   iOS Safari / 部分微信不支持时静默失败，此时由 CSS 兜底让视频横向铺满，
+   或用户横置手机后视频自然横屏全屏。退出时记得 unlockOrientation()。 */
+function tryLockLandscape() {
+  try {
+    const o = screen.orientation || screen.mozOrientation || screen.msOrientation;
+    if (o && typeof o.lock === 'function') { o.lock('landscape').catch(function () {}); }
+  } catch (e) {}
+}
+function unlockOrientation() {
+  try {
+    const o = screen.orientation;
+    if (o && typeof o.unlock === 'function') { o.unlock(); }
+  } catch (e) {}
+}
 /* 安卓微信等 X5 内核里，跨域 iframe 自带的「全屏」按钮经常被静默拦截，
    因此在父页面（同源）提供一个可靠的「放大」按钮：由父页面请求全屏。 */
 function toggleVideoFullscreen() {
@@ -1382,14 +1398,16 @@ function toggleVideoFullscreen() {
     if (fsEl && exit) { try { exit.call(document); } catch (e) {} }
     m.classList.remove('css-fs');
     document.body.classList.remove('noscroll');
+    unlockOrientation();
     syncVmodalFs();
     return;
   }
   /* 进入：优先用「CSS 兜底全屏」——由父页面把浮层铺满整个视口、隐藏顶/底多余元素，
      不依赖系统 Fullscreen API，因此在华为 / 微信 X5 / 老安卓 WebView 等环境下都能稳定生效；
-     若浏览器支持真正的系统全屏（可隐藏系统状态栏），再并行尝试一次作为增强。 */
+     同时尝试锁定横屏，让支持的浏览器点开即横屏全屏观看。 */
   m.classList.add('css-fs');
   document.body.classList.add('noscroll');
+  tryLockLandscape();
   syncVmodalFs();
   const req = m.requestFullscreen || m.webkitRequestFullscreen || m.mozRequestFullScreen || m.msRequestFullscreen;
   if (req) { try { const p = req.call(m); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
@@ -1424,12 +1442,14 @@ function toggleStageFullscreen(stage) {
   if (on) {
     if (fsEl && exit) { try { exit.call(document); } catch (e) {} }
     stage.classList.remove('css-fs');
+    unlockOrientation();
     if (!document.querySelector('.vmodal.css-fs') && !document.querySelector('.video-stage.css-fs')) document.body.classList.remove('noscroll');
     syncStageFs(stage);
     return;
   }
   stage.classList.add('css-fs');
   document.body.classList.add('noscroll');
+  tryLockLandscape();
   syncStageFs(stage);
   const req = stage.requestFullscreen || stage.webkitRequestFullscreen || stage.mozRequestFullScreen || stage.msRequestFullscreen;
   if (req) { try { const p = req.call(stage); if (p && p.catch) p.catch(() => {}); } catch (e) {} }
