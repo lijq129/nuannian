@@ -982,6 +982,21 @@ function renderMove() {
     html += (typeof FIT_COLLECTIONS !== 'undefined' ? FIT_COLLECTIONS : []).map(fitCollectionCard).join('');
     html += `<h2 class="fit-extra-heading">补充：可在本页播放</h2>`;
     html += (typeof FIT_VIDEOS !== 'undefined' ? FIT_VIDEOS : []).map(v => fitVideoCard(v, false)).join('');
+    /* 抖音搜索入口：便于后续查找更多跟练视频 */
+    html += `<div class="card dy-find">
+      <div class="card-h"><span class="dy-find-ic">抖音 · 找更多跟练</span></div>
+      <p class="h-sub" style="margin:0 0 12px">想找更多适合的跟练内容？输入关键词，或选下面的常用词，点按钮会打开抖音搜索，方便你查找其他跟练视频。</p>
+      <input id="dy-kw" class="dy-kw" type="search" inputmode="search" placeholder="如：八段锦、椅子操、护膝跟练" aria-label="抖音搜索关键词" />
+      <div class="dy-chips">
+        <button class="chip" data-act="dykw" data-kw="居家跟练">居家跟练</button>
+        <button class="chip" data-act="dykw" data-kw="八段锦跟练">八段锦</button>
+        <button class="chip" data-act="dykw" data-kw="椅子操 老年人">椅子操</button>
+        <button class="chip" data-act="dykw" data-kw="护膝 跟练">护膝跟练</button>
+        <button class="chip" data-act="dykw" data-kw="肩颈放松 跟练">肩颈放松</button>
+      </div>
+      <button class="dy-go" data-act="dysearch">去抖音搜索</button>
+      <p class="h-sub" style="margin:12px 0 0;font-size:.78rem;line-height:1.7;color:var(--ink2)">打开的是抖音网页搜索；手机上通常会提示用 App 打开。若被微信拦截，可点右上角「···」选「在浏览器打开」。</p>
+    </div>`;
     html += `<div class="note">原有条目均已保留；涉及颈部转动、后仰、抗阻或高强度的内容，需先由专业人员判断是否适用，不因"护膝""低冲击"等标题自行判断。课程页图文动作与视频库独立，不作一一配套。视频强度以标签标明（低/中/高），高强度仅作提示、不限制播放，是否跟练请结合自身情况。</div>`;
   }
 
@@ -1636,6 +1651,13 @@ document.addEventListener('click', e => {
     const url = 'https://search.bilibili.com/all?keyword=' + kw;
     const win = window.open(url, '_blank', 'noopener');
     if (!win) toast('请允许弹出窗口后再试，或在搜索引擎里搜「' + el.dataset.kw + '」');
+  }
+  /* 跟练视频页：跳转抖音搜索，便于查找更多跟练内容 */
+  if (a === 'dykw') { openDouyinSearch(el.dataset.kw || '居家跟练'); return; }
+  if (a === 'dysearch') {
+    const inp = document.getElementById('dy-kw');
+    openDouyinSearch(inp && inp.value.trim() ? inp.value.trim() : '居家跟练视频');
+    return;
   }
   if (a === 'shoptick') {
     const k = nextDayKey(); if (!S.shop[k]) S.shop[k] = [];
