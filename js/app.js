@@ -1037,8 +1037,9 @@ function renderMe() {
   </div>`;
 
   if (meTab === 'plan') {
-    html += `<div class="card">
-      <div class="profile-intro"><div class="avatar">${escapeHTML((p.name || '朋')[0])}</div><div><h2>${escapeHTML(p.name)}</h2><p>你的专属养护档案</p></div><button class="btn ghost sm" data-act="editp">${editingProfile ? '正在编辑' : '编辑'}</button></div>
+    html += `<div class="card">`;
+    if (!editingProfile) {
+      html += `<div class="profile-intro"><div class="avatar">${escapeHTML((p.name || '朋')[0])}</div><div><h2>${escapeHTML(p.name)}</h2><p>你的专属养护档案</p></div><button class="btn ghost sm" data-act="editp">编辑</button></div>
       <div class="kv"><span class="k">称呼</span><span class="v">${escapeHTML(p.name)}</span></div>
       <div class="kv"><span class="k">性别 / 年龄</span><span class="v">${p.sex === 'f' ? '女' : '男'} · ${p.age} 岁</span></div>
       <div class="kv"><span class="k">身高 / 体重</span><span class="v">${p.height} cm · ${p.weight} kg</span></div>
@@ -1051,12 +1052,10 @@ function renderMe() {
       <div class="kv"><span class="k">甲状腺手术</span><span class="v">${escapeHTML(p.thyroidSurgery)}</span></div>
       <div class="kv"><span class="k">运动相关情况</span><span class="v">${p.vertigoHistory ? '有眩晕史' : '未记录眩晕史'} · ${p.chronicLegPain ? '长期腿痛' : '未记录长期腿痛'}</span></div>
       <div class="kv"><span class="k">居家活动</span><span class="v">${p.exerciseApproved ? '医生/康复师已确认' : '还没问过医生'}</span></div>
-      <div class="kv kv-block"><span class="k">动作限制</span><span class="v">${escapeHTML(p.movementLimits || '未填写')}</span></div>
-    </div>`;
-
-    if (editingProfile) {
-      html += `<div class="card">
-        <div class="pg-title" style="margin-bottom:10px">编辑档案</div>
+      <div class="kv kv-block"><span class="k">动作限制</span><span class="v">${escapeHTML(p.movementLimits || '未填写')}</span></div>`;
+    } else {
+      /* 编辑态：同一张卡片就地切换为可编辑控件，不再在下方另起一张表单卡 */
+      html += `<div class="profile-intro"><div class="avatar">${escapeHTML((p.name || '朋')[0])}</div><div><h2>编辑档案</h2><p>直接在此修改，完成后点保存</p></div><button class="btn ghost sm" data-act="cancelp">取消</button></div>
         <div class="field"><span class="fl">称呼</span><input type="text" id="e-name" value="${escAttr(p.name)}" maxlength="12"></div>
         <div class="field"><span class="fl">性别</span><div class="seg" style="width:150px">
           <button class="${p.sex === 'f' ? 'on' : ''}" data-act="setsex" data-v="f">女</button>
@@ -1078,9 +1077,9 @@ function renderMe() {
         <div class="chips">${AVOIDS.map(a => `<button class="chip ${(p.avoids || []).includes(a.id) ? 'on' : ''}" data-act="toggleavoid" data-v="${a.id}">${a.ico} ${a.name}</button>`).join('')}</div>
         <div class="pg-title" style="margin:12px 0 6px">健康关注（决定给你推荐什么）</div>
         <div class="chips">${FOCUS.map(f => `<button class="chip ${(p.focus || []).includes(f.id) ? 'on' : ''}" data-act="togglefocus" data-v="${f.id}"><span class="chip-ic">${icon(f.ico)}</span>${f.name}</button>`).join('')}</div>
-        <button class="btn block" style="margin-top:14px" data-act="savep">保存档案</button>
-      </div>`;
+        <button class="btn block" style="margin-top:14px" data-act="savep">保存档案</button>`;
     }
+    html += `</div>`;
 
     html += `<div class="card">
       <div class="pg-title" style="margin-bottom:8px">显示与记录设置</div>
@@ -1195,6 +1194,7 @@ function renderMe() {
   if (editingProfile && sy) window.scrollTo(0, sy);
 }
 let editingProfile = false;
+let profileSnapshot = null; /* 进入编辑前的内存快照，用于「取消」还原 */
 function bindAcc() {
   $$('[data-acc] .acc-h').forEach(h => {
     const box = h.parentElement;
@@ -1617,18 +1617,19 @@ document.addEventListener('click', e => {
     const i = arr.indexOf(id); if (i >= 0) { arr.splice(i, 1); toast('已取消收藏'); } else { arr.push(id); toast('已收藏'); }
     save(); render();
   }
-  if (a === 'editp') { editingProfile = true; renderMe(); }
+  if (a === 'editp') { profileSnapshot = JSON.parse(JSON.stringify(P0())); editingProfile = true; renderMe(); }
+  if (a === 'cancelp') { if (profileSnapshot) { Object.assign(P0(), profileSnapshot); profileSnapshot = null; } editingProfile = false; renderMe(); }
   if (a === 'exportdata') exportUserData();
   if (a === 'chooseimport') $('#data-import')?.click();
   if (a === 'savep') {
     collectForm();
     editingProfile = false; save(); render(); toast('档案已保存');
   }
-  if (a === 'setsex') { P0().sex = el.dataset.v; save(); renderMe(); }
-  if (a === 'setgoal') { P0().goal = el.dataset.v; save(); renderMe(); }
-  if (a === 'setact') { P0().act = +el.dataset.v; save(); renderMe(); }
-  if (a === 'toggleavoid') { const p = P0(), i = (p.avoids || []).indexOf(el.dataset.v); if (i >= 0) p.avoids.splice(i, 1); else p.avoids.push(el.dataset.v); save(); renderMe(); }
-  if (a === 'togglefocus') { const p = P0(), i = (p.focus || []).indexOf(el.dataset.v); if (i >= 0) p.focus.splice(i, 1); else p.focus.push(el.dataset.v); save(); renderMe(); }
+  if (a === 'setsex') { collectForm(); P0().sex = el.dataset.v; save(); renderMe(); }
+  if (a === 'setgoal') { collectForm(); P0().goal = el.dataset.v; save(); renderMe(); }
+  if (a === 'setact') { collectForm(); P0().act = +el.dataset.v; save(); renderMe(); }
+  if (a === 'toggleavoid') { collectForm(); const p = P0(), i = (p.avoids || []).indexOf(el.dataset.v); if (i >= 0) p.avoids.splice(i, 1); else p.avoids.push(el.dataset.v); save(); renderMe(); }
+  if (a === 'togglefocus') { collectForm(); const p = P0(), i = (p.focus || []).indexOf(el.dataset.v); if (i >= 0) p.focus.splice(i, 1); else p.focus.push(el.dataset.v); save(); renderMe(); }
   if (a === 'toggleprofile') { collectForm(); const k = el.dataset.k; if (['vertigoHistory','chronicLegPain','exerciseApproved'].includes(k)) P0()[k] = !P0()[k]; save(); renderMe(); }
   if (a === 'font') { S.settings.font = +el.dataset.v; save(); applyFont(); render(); }
   if (a === 'toggle') { S.settings[el.dataset.k] = !S.settings[el.dataset.k]; save(); render(); }
