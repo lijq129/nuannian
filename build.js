@@ -73,8 +73,21 @@ try {
 }
 
 // 3. 写入 SW 缓存键 + 版本文件 + index.html 构建版本 meta
+//
+// 3.1 给 css/js 引用注入构建版本号（?v=<short SHA>）
+// 背景：CloudStudio 边缘节点对无参数的静态资源（如 js/app.js）缓存 TTL 很长，
+//       而 HTML 缓存很短，结果会出现「HTML 已是新版、app.js 仍是旧版」的错配，
+//       用户看到的是旧界面（而 Vercel 正常）。让资源 URL 每次构建都变化，
+//       即可绕过边缘节点 / 浏览器 / 微信 X5 的长缓存，彻底消除错配。
+function bustRefs(text, short) {
+  // 匹配 css/、js/ 目录下的 .css/.js 引用（可带 ./ 前缀）；已带查询参数的不重复追加
+  return text.replace(/((?:\.\/)?(?:css|js)\/[A-Za-z0-9_\-./]+\.(?:css|js))(\?[^"'\s)]*)?/g, (m, p, q) => (q ? m : p + '?v=' + short));
+}
+
 let sw = fs.readFileSync(path.join(DIST, 'service-worker.js'), 'utf8');
 sw = sw.replace(/const CACHE = '[^']*'/, `const CACHE = 'nuannian-shell-${short}-mobile'`);
+// SHELL 预缓存清单中的资源路径同样带上版本号，保证与 index.html 请求的 URL 一致（可命中 SW 缓存）
+sw = bustRefs(sw, short);
 fs.writeFileSync(path.join(DIST, 'service-worker.js'), sw);
 
 fs.writeFileSync(path.join(DIST, 'version.json'), JSON.stringify({ hash: short, builtAt: new Date().toISOString() }, null, 2));
@@ -85,6 +98,8 @@ if (/name="build-version"/.test(html)) {
 } else {
   html = html.replace(/<head>/, `<head>\n  <meta name="build-version" content="${short}">`);
 }
+// 3.2 css/js 引用加版本号（见 bustRefs 说明）
+html = bustRefs(html, short);
 fs.writeFileSync(path.join(DIST, 'index.html'), html);
 
 console.log('build done → dist/ 已重建，SW 缓存键 = nuannian-shell-' + short + '-mobile');
