@@ -674,7 +674,6 @@ function renderHome() {
     <button class="btn block sm" style="margin-top:12px" data-act="goto" data-view="diet" data-tab="menu">翻翻完整食谱与做法</button>
   </div>`;
 
-  html += `<div class="disclaimer">${LEGAL.disclaimer}</div>`;
   $('#home-body').innerHTML = html;
   finishView($('#home-body'));
   bindSearch();
@@ -761,7 +760,7 @@ function renderDiet() {
         <div class="mc"><b>${t.carb}</b><span>克碳水</span></div>
         <div class="mc"><b>${t.fat}</b><span>克脂肪</span></div>
       </div>
-      <div class="note" style="margin-top:10px">这些数字是按你的身高体重估的日常参考，不是营养处方，看看就好。${DIET.goalNotes[p.goal] || ''}</div>
+      <div class="note" style="margin-top:10px">这些数字是按你的身高体重估的日常参考，看看就好。${DIET.goalNotes[p.goal] || ''}</div>
     </div>`;
 
     html += mealCards(plan, t, true);
@@ -782,7 +781,7 @@ function renderDiet() {
 
     html += `<div class="card">
       <div class="card-h"><span class="ct">换着吃，不单调</span><span class="tag o">每天自动更新</span></div>
-      <p class="h-sub">已按你的资料和忌口提供今日搭配参考，每天自动轮换；觉得不合适可点「换一换」。这不是个体化营养处方。忌口全局生效（当前：${(p.avoids || []).length ? p.avoids.map(a => (AVOIDS.find(x => x.id === a) || {}).name).join('、') : '无'}）。</p>
+      <p class="h-sub">已按你的资料和忌口提供今日搭配参考，每天自动轮换；觉得不合适可点「换一换」。忌口全局生效（当前：${(p.avoids || []).length ? p.avoids.map(a => (AVOIDS.find(x => x.id === a) || {}).name).join('、') : '无'}）。</p>
     </div>`;
   }
 
@@ -983,21 +982,6 @@ function renderMove() {
     html += (typeof FIT_COLLECTIONS !== 'undefined' ? FIT_COLLECTIONS : []).map(fitCollectionCard).join('');
     html += `<h2 class="fit-extra-heading">补充：可在本页播放</h2>`;
     html += (typeof FIT_VIDEOS !== 'undefined' ? FIT_VIDEOS : []).map(v => fitVideoCard(v, false)).join('');
-    /* 抖音搜索入口：便于后续查找更多跟练视频 */
-    html += `<div class="card dy-find">
-      <div class="card-h"><span class="dy-find-ic">抖音 · 找更多跟练</span></div>
-      <p class="h-sub" style="margin:0 0 12px">想找更多适合的跟练内容？输入关键词，或选下面的常用词，点按钮会打开抖音搜索，方便你查找其他跟练视频。</p>
-      <input id="dy-kw" class="dy-kw" type="search" inputmode="search" placeholder="如：八段锦、椅子操、护膝跟练" aria-label="抖音搜索关键词" />
-      <div class="dy-chips">
-        <button class="chip" data-act="dykw" data-kw="居家跟练">居家跟练</button>
-        <button class="chip" data-act="dykw" data-kw="八段锦跟练">八段锦</button>
-        <button class="chip" data-act="dykw" data-kw="椅子操 老年人">椅子操</button>
-        <button class="chip" data-act="dykw" data-kw="护膝 跟练">护膝跟练</button>
-        <button class="chip" data-act="dykw" data-kw="肩颈放松 跟练">肩颈放松</button>
-      </div>
-      <button class="dy-go" data-act="dysearch">去抖音搜索</button>
-      <p class="h-sub" style="margin:12px 0 0;font-size:.78rem;line-height:1.7;color:var(--ink2)">打开的是抖音网页搜索；手机上通常会提示用 App 打开。若被微信拦截，可点右上角「···」选「在浏览器打开」。</p>
-    </div>`;
     html += `<div class="note">原有条目均已保留；涉及颈部转动、后仰、抗阻或高强度的内容，需先由专业人员判断是否适用，不因"护膝""低冲击"等标题自行判断。课程页图文动作与视频库独立，不作一一配套。视频强度以标签标明（低/中/高），高强度仅作提示、不限制播放，是否跟练请结合自身情况。</div>`;
   }
 
@@ -1030,7 +1014,6 @@ function renderMove() {
     });
   }
 
-  html += `<div class="disclaimer">本页内容为生活养护建议，不涉及疾病诊断与治疗。</div>`;
   $('#move-body').innerHTML = html;
   finishView($('#move-body'));
   bindAcc();
@@ -1548,7 +1531,18 @@ document.addEventListener('click', e => {
     const id = el.dataset.id, c = todayChecks();
     if (id === 'water') { c.water = (c.water || 0) + 1; if (c.water > 12) c.water = 0; }
     else if (id === 'med') { c.med = c.med ? 0 : 1; toast(c.med ? '已记录服药' : '已取消'); }
-    else { c[id] = c[id] ? 0 : 1; if (c[id]) toast('打卡成功'); }
+    else {
+      const wasOn = c[id];
+      c[id] = wasOn ? 0 : 1;
+      if (c[id]) {
+        toast('打卡成功');
+        if (id === 'walk') {
+          const tk = today();
+          const dup = (S.logs || []).some(l => l.d === tk && l.type === 'exercise' && l.t === 'walk');
+          if (!dup) { S.logs = S.logs || []; S.logs.push({ d: tk, t: 'walk', name: '散步 / 活动打卡', type: 'exercise' }); }
+        }
+      }
+    }
     save(); render();
   }
   if (a === 'eat') {
@@ -1642,13 +1636,6 @@ document.addEventListener('click', e => {
     const url = 'https://search.bilibili.com/all?keyword=' + kw;
     const win = window.open(url, '_blank', 'noopener');
     if (!win) toast('请允许弹出窗口后再试，或在搜索引擎里搜「' + el.dataset.kw + '」');
-  }
-  /* 跟练视频页：跳转抖音搜索，便于查找更多跟练内容 */
-  if (a === 'dykw') { openDouyinSearch(el.dataset.kw || '居家跟练'); return; }
-  if (a === 'dysearch') {
-    const inp = document.getElementById('dy-kw');
-    openDouyinSearch(inp && inp.value.trim() ? inp.value.trim() : '居家跟练视频');
-    return;
   }
   if (a === 'shoptick') {
     const k = nextDayKey(); if (!S.shop[k]) S.shop[k] = [];
@@ -1850,7 +1837,7 @@ async function saveWork() {
   const work = { id, title: title || '无标题作品', desc, createdAt: Date.now(), date: today(), hasVideo: !!file };
   S.works = S.works || []; S.works.unshift(work); save();
   if (file && typeof indexedDB !== 'undefined') {
-    try { await putWorkVideo(id, file); } catch (e) { work.hasVideo = false; toast('视频保存失败，文字已保存'); }
+    try { await putWorkVideo(id, file); } catch (e) { work.hasVideo = false; save(); toast('视频保存失败，文字已保存'); }
   }
   render(); toast('已保存到「我的作品」');
 }
