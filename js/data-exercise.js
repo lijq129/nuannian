@@ -358,7 +358,7 @@ EX.courses = [
     cls: 'n',
     minutes: 5,
     cat: 'part', tags: ['肩背放松', '坐姿', '低强度'],
-    video: { bv: 'BV1Rg411w7nD', title: '10分钟肩颈放松瑜伽·办公族自救拉伸', up: 'Yue Yoga' },
+
     items: [
       { name: '热敷肩颈', dur: 180, svg: 'hotpack', target: '3 分钟', steps: ['用 40~45℃ 的热毛巾或热敷袋敷在后颈和肩膀上。', '温度以"温热舒服"为准，不烫不刺痛。', '肩膀完全放松，慢慢呼吸。'], caution: '皮肤感觉迟钝时一定先用手腕内侧试温，避免烫伤。' },
       { name: '肩胛后缩下沉', dur: 60, svg: 'shoulderSqueeze', target: '10 次 × 2 组', steps: ['坐直或站直，两臂自然下垂。', '两侧肩胛骨慢慢往中间夹，肩膀同时往下沉。', '夹住停 3 秒，再慢慢松开。'], caution: '只动肩胛骨，脖子不要跟着用力、不要耸肩。' },
@@ -373,7 +373,7 @@ EX.courses = [
     cls: 'l',
     minutes: 10,
     cat: 'part', tags: ['腿部', '无器械', '低强度', '静脉养护'],
-    video: { bv: 'BV1VQG7zREy8', title: '低强度步行训练·饭后助消化无跳跃', up: 'MIZI' },
+
     items: [
       { name: '坐姿踝泵', dur: 180, svg: 'anklePump', target: '15 次 × 3 组', steps: ['坐在有靠背的稳固椅子上，双脚踩地。', '脚尖慢慢向上勾，再慢慢向下踩。', '在舒服范围内反复，组间休息。'], caution: '不要追求最大幅度。若一侧小腿突然肿痛、发热或皮肤变色，不要做并尽快就医。' },
       { name: '坐姿脚踝画圈', dur: 120, svg: 'ankleCircle', target: '每侧各方向 8 圈', steps: ['坐稳，单脚轻轻离地。', '以脚踝为轴缓慢画小圈。', '换方向和另一侧。'], caution: '动作小而慢；出现抽筋、疼痛或麻木就停止。' },
@@ -389,7 +389,7 @@ EX.courses = [
     cls: 'w',
     minutes: 7,
     cat: 'quick', tags: ['全身', '无器械', '长辈友好'],
-    video: { bv: 'BV1MwVVziE7T', title: '八段锦12分钟口令版跟练（镜像+呼吸）', up: '健身气功' },
+
     items: [
       { name: '深呼吸热身', dur: 60, svg: 'breath', target: '6 次', steps: ['站直或坐直，一手放胸口一手放肚子。', '鼻子慢慢吸气 4 秒，感觉肚子鼓起来。', '嘴巴慢慢呼气 6 秒，肚子收回去。'], caution: '呼气比吸气长一点。头晕就放慢节奏。' },
       { name: '双手托天', dur: 60, svg: 'raiseArms', target: '6 次', steps: ['两手上提至胸前，掌心向上。', '慢慢向上托起，手臂伸直，眼睛平视。', '停 2 秒，两手从两侧慢慢落下。'], caution: '头不仰！眼睛始终平视前方，手臂不必完全伸直。' },
@@ -407,7 +407,7 @@ EX.courses = [
     cls: 'w',
     minutes: 6,
     cat: 'scene', tags: ['晨起', '全身', '无器械'],
-    video: { bv: 'BV1nxrPBjEe1', title: '10分钟床上舒缓拉伸·晨起激活身体', up: '刘畊宏' },
+
     items: [
       { name: '原地踏步', dur: 60, svg: 'march', target: '1 分钟', steps: ['站直，双手自然摆动。', '原地慢慢踏步，膝盖抬到舒服的高度。'], caution: '刚起床动作要慢，站不稳就扶着桌子。' },
       { name: '肩绕环', dur: 45, svg: 'shoulderRoll', target: '10 次 × 2 组', steps: ['两肩慢慢向上、向后、向下画圈。', '一圈约 3 秒。'], caution: '只绕肩，脖子放松不动。' },
@@ -425,7 +425,7 @@ EX.courses = [
     cls: 'l',
     minutes: 8,
     cat: 'scene', tags: ['饭后', '低强度', '消食'],
-    video: { bv: 'BV1Kuniz1Exq', title: '20分钟低强度踏步训练·促消化', up: 'Jo' },
+
     items: [
       { name: '站立放松呼吸', dur: 60, svg: 'breath', target: '8 次', steps: ['站直，双脚与肩同宽。', '鼻吸 4 秒、口呼 6 秒，肩膀放松。'], caution: '饭后不做弯腰、倒立、跳跃动作。' },
       { name: '原地踏步', dur: 120, svg: 'march', target: '2 分钟', steps: ['原地慢慢踏步，手臂自然摆动。', '速度以能正常说话为准。'], caution: '有胃下垂或腹部不适就放慢或停下。' },
@@ -442,7 +442,7 @@ EX.courses = [
     cls: 'n',
     minutes: 10,
     cat: 'posture', tags: ['体态', '肩背', '办公族'],
-    video: { bv: 'BV1zq4y197rR', title: 'YTWL矫正训练·改善圆肩驼背（可坐姿）', up: '健身UP' },
+
     items: [
       { name: '收下巴', dur: 60, svg: 'chinTuck', target: '5 秒 × 8 次', steps: ['坐直，眼睛平视。', '头水平向后平移，做出"双下巴"的感觉，停 5 秒。'], caution: '不低头不仰头。有眩晕立刻停止。' },
       { name: '肩胛后缩', dur: 60, svg: 'shoulderSqueeze', target: '10 次 × 2 组', steps: ['两臂自然下垂，肩胛骨往中间夹。', '停 3 秒再松开。'], caution: '不耸肩，脖子放松。' },
@@ -460,7 +460,7 @@ EX.courses = [
     cls: 'w',
     minutes: 12,
     cat: 'quick', tags: ['低冲击', '减脂', '全身', '无器械'],
-    video: { bv: 'BV1rwTX6TEcs', title: '20分钟无跳跃全身训练·改善消化助眠', up: 'Eleni Fit' },
+
     items: [
       { name: '原地踏步热身', dur: 120, svg: 'march', target: '2 分钟', steps: ['原地踏步，手臂自然摆动。', '逐渐加快到微微发热。'], caution: '膝盖不舒服就减小抬腿幅度。' },
       { name: '肩绕环', dur: 45, svg: 'shoulderRoll', target: '10 次 × 2 组', steps: ['两肩向后画圈，一圈 3 秒。'], caution: '脖子不动。' },
@@ -576,7 +576,7 @@ EX.courses = [
     cls: 'l',
     minutes: 8,
     cat: 'part', tags: ['膝盖', '无器械', '低强度', '腿部'],
-    video: { bv: 'BV18URpBnEUE', title: '坐姿全身训练——预防老年人跌倒的舒缓锻炼', up: '康复操' },
+
     items: [
       { name: '坐姿伸膝', dur: 90, svg: 'kneeExtend', target: '每侧 12 次 × 2 组', steps: ['坐稳，一条腿慢慢伸直，停 2 秒，再慢慢放下。'], caution: '不锁死膝关节，不甩腿；膝盖不适就减小幅度。' },
       { name: '卧位抬腿画圈', dur: 90, svg: 'bicycle', target: '1 分钟 × 2 组', steps: ['坐稳，双腿像蹬自行车一样缓慢交替画圈。'], caution: '动作慢、幅度小；膝盖不适就减小圈。' },
@@ -592,7 +592,7 @@ EX.courses = [
     cls: 'w',
     minutes: 6,
     cat: 'posture', tags: ['久坐', '肩颈', '踝泵', '低强度'],
-    video: { bv: 'BV1HhgZzCEBz', title: '20分钟温和解压拉伸', up: '舞蹈大师课' },
+
     items: [
       { name: '坐姿扩胸', dur: 60, svg: 'chestStretch', target: '10 秒 × 4 次', steps: ['坐稳，双肩轻向后下方打开，胸口舒展到舒服即可。'], caution: '肩膀下沉，不憋气。' },
       { name: '肩胛后缩', dur: 60, svg: 'shoulderSqueeze', target: '10 次 × 2 组', steps: ['两臂自然下垂，肩胛骨往中间夹，停 3 秒松开。'], caution: '不耸肩，脖子放松。' },
@@ -608,7 +608,7 @@ EX.courses = [
     cls: 'w',
     minutes: 5,
     cat: 'quick', tags: ['呼吸', '放松', '助眠', '低强度'],
-    video: { bv: 'BV15HfDB7ETz', title: '20分钟躯体疗愈冥想引导', up: '冥想引导' },
+
     items: [
       { name: '腹式呼吸', dur: 120, svg: 'breath', target: '10 次', steps: ['一手放肚子，鼻吸 4 秒肚子鼓起，口呼 6 秒肚子收回。'], caution: '呼气比吸气长；头晕就放慢。' },
       { name: '4-7-8 呼吸', dur: 120, svg: 'breath', target: '6 轮', steps: ['吸气 4 秒 → 屏气 7 秒 → 呼气 8 秒，做 6 轮。'], caution: '屏气不适就缩短或跳过，不勉强。' },
@@ -624,7 +624,7 @@ EX.courses = [
     cls: 'w',
     minutes: 8,
     cat: 'balance', tags: ['平衡', '防跌倒', '扶稳', '低强度'],
-    video: { bv: 'BV18URpBnEUE', title: '坐姿全身训练——预防跌倒舒缓锻炼', up: '康复操' },
+
     items: [
       { name: '扶椅单脚站', dur: 60, svg: 'balance', target: '每侧 20 秒 × 2 组', steps: ['一手扶稳椅背，一条腿轻轻抬起 2~3 厘米，保持 20 秒换边。'], caution: '必须有扶的东西；头晕、站不稳立刻停下。' },
       { name: '脚跟脚尖走', dur: 60, svg: 'walk', target: '15 秒 × 2 组', steps: ['沿一条直线，脚跟碰脚尖慢慢向前走。'], caution: '有人陪同或扶墙；眩晕明显不做。' },
@@ -640,7 +640,7 @@ EX.courses = [
     cls: 'w',
     minutes: 7,
     cat: 'scene', tags: ['睡前', '拉伸', '放松', '助眠'],
-    video: { bv: 'BV15HfDB7ETz', title: '20分钟躯体疗愈冥想引导', up: '冥想引导' },
+
     items: [
       { name: '体侧伸展', dur: 60, svg: 'sideStretch', target: '每侧 20 秒', steps: ['手臂过头向对侧慢慢侧弯，停 20 秒换边。'], caution: '不转头、不后仰。' },
       { name: '靠墙抬腿', dur: 240, svg: 'legsUpWall', target: '3 分钟', steps: ['臀部靠墙，双腿贴墙竖起，全身放松慢慢呼吸。'], caution: '腿麻、腰痛、头晕立刻放下。' },

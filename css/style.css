@@ -174,6 +174,30 @@ img{display:block}
 .acc-b p{margin:0 0 7px}
 .acc-b .tags{display:flex;flex-wrap:wrap;gap:6px}
 
+/* 我的 → 记录页：近 14 天每日历史 */
+.daylog .dl-date{font-weight:800;font-size:.96rem}
+.daylog .dl-wd{font-size:.78rem;color:var(--ink3);margin-left:6px}
+.daylog .dlog-tags{display:flex;gap:6px;flex-wrap:wrap;margin-left:8px}
+.daylog .acc-h{gap:10px}
+.dl-sec{margin-top:10px}
+.dl-sec > b{display:block;font-size:.82rem;color:var(--brand);margin-bottom:4px}
+
+/* 我的作品页 */
+.works-form .w-field{display:flex;flex-direction:column;gap:6px;margin-bottom:10px;font-size:.9rem;font-weight:700;color:var(--ink)}
+.works-form .w-input{font-weight:400;font-size:.95rem;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:var(--ink);width:100%;box-sizing:border-box;font-family:inherit}
+.works-form textarea.w-input{resize:vertical;min-height:64px;line-height:1.6}
+.works-form .w-file{font-weight:700}
+.works-form .w-file input{font-weight:400;margin-top:2px}
+.work-video{width:100%;border-radius:12px;background:#000;margin:6px 0 0;display:block}
+.work-video.hidden{display:none}
+.work-item{margin-top:2px}
+.work-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:6px}
+.work-h b{font-size:1.02rem;font-weight:800}
+.work-date{font-size:.78rem;color:var(--ink3);flex:none}
+.work-desc{font-size:.9rem;color:var(--ink2);line-height:1.65;margin:0 0 8px;white-space:pre-wrap;word-break:break-word}
+.work-acts{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.fit-extra-heading{font-size:1.05rem;margin:14px 0 6px}
+
 .svg-sm{width:66px;height:56px;flex:none;background:#F5F8F7;border-radius:10px;display:flex;align-items:center;justify-content:center}
 .svg-sm svg{width:100%;height:100%}
 .svg-sm .act-photo{width:100%;height:100%;object-fit:contain;padding:4px;box-sizing:border-box;border-radius:10px}
@@ -476,6 +500,10 @@ svg circle[fill="#E07A5F"],svg ellipse[fill="#E07A5F"]{animation:pulseDot 1.8s e
 .fitcol-t{font-size:.76rem;color:var(--brand);font-weight:700}
 .fitcol-d{margin:9px 0 11px;font-size:.86rem;color:var(--ink2);line-height:1.65}
 .fitlist{display:flex;flex-direction:column;gap:7px}
+/* 跟练视频合集：作为可收起/展开的手风琴，默认收起，避免一进页面就全部展开 */
+.acc.fitcol{padding:0;margin:12px 0 0;border-radius:var(--r-md);overflow:hidden}
+.acc.fitcol .acc-h{padding:13px 14px}
+.acc.fitcol .fitcol-d{margin:2px 0 10px}
 .fitrow{display:flex;align-items:center;gap:10px;background:#F7FAF8;border:1px solid var(--line);border-radius:12px;padding:10px 12px}
 .fitrow-x{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.38}
 .fitrow-n{font-weight:600;font-size:.92rem}

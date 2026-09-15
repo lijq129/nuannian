@@ -9,6 +9,7 @@ const DEFAULTS = {
   settings: { font: 1, voice: true },
   med: { drugTime: '06:30', calciumTime: '12:30', calciumEnabled: false, lowIodine: false },
   checks: {}, healthChecks: {}, dietOff: {}, logs: [], myVideos: [], shop: {}, mealOverride: {}, confirmed: {},
+  works: [],
   dataMeta: { version: APP_DATA_VERSION, lastImportedAt: '' },
   favs: { recipe: [], course: [], care: [] }
 };
@@ -114,6 +115,45 @@ function weekDates() {
   }
   return out;
 }
+const MEAL_LABELS = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' };
+/* 最近 n 天（含今天）的日期键与中文星期，用于历史记录 */
+function recentDays(n) {
+  const out = []; const now = new Date(); const wk = '日一二三四五六';
+  for (let i = n - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth(), now.getDate() - i);
+    const key = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    out.push({ key, day: d.getDate(), wd: wk[d.getDay()], isToday: i === 0 });
+  }
+  return out;
+}
+/* 我的 → 记录页：近 14 天每日历史（运动 + 饮食搭配打卡），默认展开今天 */
+function recordHistoryHTML() {
+  const logs = S.logs || [];
+  const days = recentDays(14);
+  const exOf = k => logs.filter(l => l.d === k && l.type === 'exercise');
+  const diOf = k => logs.filter(l => l.d === k && l.type === 'diet');
+  const item = (l, ico) => `<div class="item"><span class="ico">${ico}</span><span class="txt"><span class="t1">${escapeHTML(l.name)}</span></span></div>`;
+  return `<div class="card">
+    <div class="pg-title" style="margin-bottom:8px">每日记录（近 14 天）</div>
+    <p class="h-sub" style="margin:0 0 10px">点开任意一天，看当天做了哪些运动和饮食搭配打卡。</p>
+    ${days.map(dy => {
+      const ex = exOf(dy.key), di = diOf(dy.key);
+      const exHTML = ex.length ? ex.map(l => item(l, '🏃')).join('') : '<div class="h-sub" style="margin:2px 0 4px">无运动打卡</div>';
+      const diHTML = di.length ? di.map(l => item(l, '🍱')).join('') : '<div class="h-sub" style="margin:2px 0 4px">无饮食打卡</div>';
+      const tags = ex.length ? `<span class="tag g">运动 ${ex.length}</span>` : '';
+      const tags2 = di.length ? `<span class="tag o">饮食 ${di.length}</span>` : '';
+      const none = (!ex.length && !di.length) ? '<span class="tag gray">未记录</span>' : '';
+      return `<section class="acc daylog ${dy.isToday ? 'open' : ''}" data-acc>
+        <button class="acc-h" type="button"><span class="aico">📅</span><span style="flex:1;min-width:0"><span class="dl-date">${dy.key.slice(5)}</span><span class="dl-wd">周${dy.wd}${dy.isToday ? ' · 今天' : ''}</span></span>
+          <span class="dlog-tags">${tags}${tags2}${none}</span><span class="arw">›</span></button>
+        <div class="acc-b">
+          <div class="dl-sec"><b>运动</b>${exHTML}</div>
+          <div class="dl-sec"><b>饮食搭配</b>${diHTML}</div>
+        </div>
+      </section>`;
+    }).join('')}
+  </div>`;
+}
 let toastTimer;
 function toast(msg, ms) { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove('show'), ms || 1900); }
 function currentBuild() { const m = document.querySelector('meta[name="build-version"]'); return (m && m.content) ? m.content : (location.protocol === 'file:' ? '本地' : '未知'); }
@@ -197,7 +237,8 @@ Object.assign(ICONS, {
   calendar: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M7 3v4m10-4v4M3 11h18m-14 4h3m4 0h3"/>',
   volume: '<path d="m11 4-6 5H2v6h3l6 5Zm4 4a6 6 0 0 1 0 8m3-11a10 10 0 0 1 0 14"/>',
   bone: '<path d="M17 10a3 3 0 1 0-3-3l-7 7a3 3 0 1 0 3 3Z"/>',
-  snow: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/>'
+  snow: '<path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 3 3-3M9 20l3-3 3 3"/>',
+  star: '<path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 17l-5.2 2.8 1-5.8L3.5 9.2l5.9-.9Z"/>'
 });
 function pageHeading(title, sub) {
   return `<header class="page-heading"><div><span class="eyebrow">暖年 · 每日养护</span><h1>${title}</h1><p>${sub}</p></div><span class="brand-mark" aria-hidden="true">${icon('care')}</span></header>`;
@@ -261,7 +302,7 @@ function mealHasBlockedContent(m, av) {
   return false;
 }
 function noMealMatch(type) {
-  const label = { breakfast:'早餐', lunch:'午餐', dinner:'晚餐', snack:'加餐' }[type];
+  const label = MEAL_LABELS[type];
   return { name:`${label}暂不自动推荐`, kcal:0, pro:0, unavailable:true, foods:[], has:[],
     tip:'没有找到同时符合全部忌口或当前低碘要求的预设搭配。系统不会忽略限制，请在“我的”核对设置，必要时咨询医生或营养师。' };
 }
@@ -463,6 +504,7 @@ function pageState() {
   return { currentView, dietTab, recipeFilter, recipeOpen, recipeQuery, recipeCat, moveTab, exCat, meTab, editingProfile, homeQuery: window.__q || '' };
 }
 function pageLabel(s) {
+  if (s.currentView === 'works') return '我的作品';
   if (s.currentView === 'home') return s.homeQuery ? '首页搜索' : '今日';
   if (s.currentView === 'diet') return { menu:'今日三餐', tmrw:'明日推荐', recipe:'家常菜谱' }[s.dietTab] || '饮食';
   if (s.currentView === 'move') return { course:'养护课程', video:'跟练视频', routine:'作息', safe:'安全须知' }[s.moveTab] || '活动养护';
@@ -880,15 +922,17 @@ function actRowHTML(t) {
 const MOVE_TABS = [['course', '课程'], ['video', '跟练视频'], ['routine', '作息'], ['safe', '安全须知']];
 
 function fitCollectionCard(col) {
-  return `<section class="fitcol" data-fit-collection="${escAttr(col.id)}">
-    <div class="fitcol-h"><span class="fitava">${icon('video')}</span><span class="fitcol-x"><span class="fitcol-n">${escAttr(col.name)}</span><span class="fitcol-t">${escAttr(col.tag)} · 原分类</span></span><span class="tag g">${col.videos.length} 段可播放</span></div>
-    <p class="fitcol-d">${escAttr(col.desc)}</p>
-    <div class="fitlist">${col.videos.map(v => fitVideoCard({
-      ...v, original: true, name: v.title, title: v.sourceTitle,
-      desc: v.matchNote, format: '完整视频 · 页面内播放',
-      caution: v.level === '进阶' ? '这是高强度训练，不因无跳跃就适合当前身体情况。请先看示范，经专业人员确认适用后再跟练；不追求跟满全程。'
-        : '原有名称和分类不代表个体适用性。颈肩、腿部不适或反复眩晕时，先由专业人员确认动作是否适合；观看不等于需要跟练。'
-    }, false)).join('')}</div>
+  return `<section class="acc fitcol" data-acc data-fit-collection="${escAttr(col.id)}">
+    <button class="acc-h" type="button"><span class="aico">${icon('video')}</span><span class="fitcol-x"><span class="fitcol-n">${escAttr(col.name)}</span><span class="fitcol-t">${escAttr(col.tag)} · 原分类</span></span><span class="tag g">${col.videos.length} 段可播放</span><span class="arw">›</span></button>
+    <div class="acc-b">
+      <p class="fitcol-d">${escAttr(col.desc)}</p>
+      <div class="fitlist">${col.videos.map(v => fitVideoCard({
+        ...v, original: true, name: v.title, title: v.sourceTitle,
+        desc: v.matchNote, format: '完整视频 · 页面内播放',
+        caution: v.level === '进阶' ? '这是高强度训练，不因无跳跃就适合当前身体情况。请先看示范，经专业人员确认适用后再跟练；不追求跟满全程。'
+          : '原有名称和分类不代表个体适用性。颈肩、腿部不适或反复眩晕时，先由专业人员确认动作是否适合；观看不等于需要跟练。'
+      }, false)).join('')}</div>
+    </div>
   </section>`;
 }
 
@@ -1155,8 +1199,8 @@ function renderMe() {
     }).join('')}</div></div>
     <div class="stat-row">
       <div class="stat"><div class="sv">${streak}</div><div class="sl">连续打卡（天）</div></div>
-      <div class="stat"><div class="sv">${(S.logs || []).length}</div><div class="sl">完成课程（次）</div></div>
-      <div class="stat"><div class="sv">${Object.keys(S.checks).length}</div><div class="sl">有记录天数</div></div>
+      <div class="stat"><div class="sv">${(S.logs || []).filter(l => l.type === 'exercise').length}</div><div class="sl">运动打卡（次）</div></div>
+      <div class="stat"><div class="sv">${(S.logs || []).filter(l => l.type === 'diet').length}</div><div class="sl">饮食打卡（次）</div></div>
     </div>
     <div class="card">
       <div class="pg-title" style="margin-bottom:8px">本周身体状态</div>
@@ -1164,10 +1208,11 @@ function renderMe() {
       <p class="h-sub">只记录你自己选的状态，不能代替诊断；如果总是不舒服，可以带着记录去问问医生。</p>
     </div>
     <div class="card">
-      <div class="pg-title" style="margin-bottom:6px">最近的练习</div>
-      ${(S.logs || []).length ? (S.logs).slice(-12).reverse().map(l => `<div class="item"><span class="ico">✓</span><span class="txt"><span class="t1">${l.name}</span><br><span class="t2">${l.d}</span></span></div>`).join('')
+      <div class="pg-title" style="margin-bottom:6px">最近打卡</div>
+      ${(S.logs || []).length ? (S.logs).slice(-12).reverse().map(l => `<div class="item"><span class="ico">${l.type === 'diet' ? '🍱' : '🏃'}</span><span class="txt"><span class="t1">${escapeHTML(l.name)}</span><br><span class="t2">${l.d}</span></span></div>`).join('')
         : '<div class="empty"><span class="e-ico">🏃</span>还没有练习记录</div>'}
-    </div>`;
+    </div>
+    ${recordHistoryHTML()}`;
   }
 
   if (meTab === 'legal') {
@@ -1202,11 +1247,11 @@ function bindAcc() {
     h.onclick = () => {
       const open = box.classList.toggle('open');
       h.setAttribute('aria-expanded', open);
-      if (open && !box.classList.contains('fit-video-card')) loadCookingVideo(box.querySelector('.video-stage'));
+      if (open && !box.classList.contains('fit-video-card') && !box.classList.contains('fitcol')) loadCookingVideo(box.querySelector('.video-stage'));
       else stopCookingVideos(box);
     };
   });
-  const openVideo = document.querySelector('.view:not(.hidden) .acc.open:not(.fit-video-card) .video-stage');
+  const openVideo = document.querySelector('.view:not(.hidden) .acc.open:not(.fit-video-card):not(.fitcol) .video-stage');
   if (openVideo && !restoringPage) loadCookingVideo(openVideo);
 }
 
@@ -1275,7 +1320,7 @@ function next(auto) {
 function finish() {
   pause(); const o = P.obj;
   if (!P.single) {
-    S.logs = S.logs || []; S.logs.push({ d: today(), t: P.tag || o.id || o.name, name: o.name });
+    S.logs = S.logs || []; S.logs.push({ d: today(), t: P.tag || o.id || o.name, name: o.name, type: 'exercise' });
     const c = todayChecks();
     if (P.tag === 'neck') { c.neck = 1; if (P0().focus.includes('neck')) c.neck = 1; }
     if (P.tag === 'leg') { c.leg = 1; c.legup = 1; }
@@ -1506,7 +1551,22 @@ document.addEventListener('click', e => {
     else { c[id] = c[id] ? 0 : 1; if (c[id]) toast('打卡成功'); }
     save(); render();
   }
-  if (a === 'eat') { const c = todayChecks(); c[el.dataset.m] = 1; save(); toast('已打卡'); render(); }
+  if (a === 'eat') {
+    const m = el.dataset.m, c = todayChecks(); c[m] = 1;
+    const tk = today();
+    const dup = (S.logs || []).some(l => l.d === tk && l.type === 'diet' && l.t === 'meal:' + m);
+    if (!dup) { S.logs = S.logs || []; S.logs.push({ d: tk, t: 'meal:' + m, name: (MEAL_LABELS[m] || '餐食') + ' 搭配打卡', type: 'diet' }); }
+    save(); toast('已打卡'); render();
+  }
+  /* 我的作品：保存 / 播放 / 分享到抖音 / 删除 */
+  if (a === 'worksave') { saveWork(); return; }
+  if (a === 'workplay') { playWorkVideo(el.dataset.id); return; }
+  if (a === 'workshare') {
+    const w = (S.works || []).find(x => x.id === el.dataset.id);
+    if (w) shareWorkToDouyin(w); else toast('作品不存在');
+    return;
+  }
+  if (a === 'workdel') { delWork(el.dataset.id); return; }
   if (a === 'medmark') { const id = el.dataset.id, c = todayChecks(); c[id] = c[id] ? 0 : 1; save(); toast(c[id] ? (id === 'med' ? '已记录服药' : '已记录补钙') : '已取消'); render(); }
   /* 逐个菜品展开文字做法 */
   if (a === 'dish') {
@@ -1711,12 +1771,128 @@ function showOnboarding() {
   });
 }
 
+/* ================= 我的作品（文字 + 视频，本机保存，可分享到抖音） ================= */
+const WORKS_DB = 'nuannian_works', WORKS_STORE = 'videos';
+function openWorksDB() {
+  return new Promise((res, rej) => {
+    if (typeof indexedDB === 'undefined') { rej(new Error('no-idb')); return; }
+    const r = indexedDB.open(WORKS_DB, 1);
+    r.onupgradeneeded = e => { const db = e.target.result; if (!db.objectStoreNames.contains(WORKS_STORE)) db.createObjectStore(WORKS_STORE); };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  });
+}
+function putWorkVideo(id, blob) {
+  return openWorksDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(WORKS_STORE, 'readwrite');
+    tx.objectStore(WORKS_STORE).put(blob, id);
+    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+  }));
+}
+function getWorkVideo(id) {
+  return openWorksDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(WORKS_STORE, 'readonly');
+    const rq = tx.objectStore(WORKS_STORE).get(id);
+    rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+  }));
+}
+function delWorkVideo(id) {
+  return openWorksDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(WORKS_STORE, 'readwrite');
+    tx.objectStore(WORKS_STORE).delete(id);
+    tx.oncomplete = () => res(); tx.onerror = () => rej(tx.error);
+  }));
+}
+function buildWorkCaption(w) {
+  return '【暖年 · 我的日常】' + w.title + '\n' + (w.desc ? w.desc + '\n' : '') + '#日常记录 #做饭 #手工 #生活';
+}
+function renderWorks() {
+  const works = S.works || [];
+  const form = `<div class="card works-form">
+    <div class="pg-title" style="margin-bottom:8px">记录新作品</div>
+    <label class="w-field">标题<input id="w-title" class="w-input" maxlength="40" placeholder="如：今天做的清蒸鲈鱼"></label>
+    <label class="w-field">说明<textarea id="w-desc" class="w-input" maxlength="200" rows="3" placeholder="想说的话、做法要点…"></textarea></label>
+    <label class="w-field w-file">视频<input id="w-video" type="file" accept="video/*"></label>
+    <video id="w-preview" class="work-video hidden" controls playsinline></video>
+    <button class="btn block" data-act="worksave">保存到「我的作品」</button>
+    <p class="h-sub" style="margin:10px 0 0">视频只存在本机浏览器，不会自动上传；想发抖音请用每件作品下方的「分享到抖音」。</p>
+  </div>`;
+  const list = works.length ? works.map(w => {
+    const vid = w.hasVideo ? `<video class="work-video" data-vid="${escAttr(w.id)}" controls playsinline preload="none"></video>
+      <div class="work-acts"><button class="btn sm" data-act="workplay" data-id="${escAttr(w.id)}">加载并播放</button></div>` : '';
+    return `<div class="card work-item" data-id="${escAttr(w.id)}">
+      <div class="work-h"><b>${escAttr(w.title)}</b><span class="work-date">${escAttr(w.date || '')}</span></div>
+      ${w.desc ? `<p class="work-desc">${escAttr(w.desc)}</p>` : ''}
+      ${vid}
+      <div class="work-acts">
+        <button class="btn ghost sm" data-act="workshare" data-id="${escAttr(w.id)}">分享到抖音</button>
+        <button class="btn ghost sm" data-act="workdel" data-id="${escAttr(w.id)}">删除</button>
+      </div>
+    </div>`;
+  }).join('') : '<div class="empty"><span class="e-ico">🍲</span>还没有作品，把今天的做饭、手工记录下来吧</div>';
+  $('#works-body').innerHTML = pageHeading('我的作品', '做饭、手工，随手记下来。') + form + `<h2 class="fit-extra-heading">已记录 ${works.length} 件</h2>` + list;
+  const fi = $('#w-video'), pv = $('#w-preview');
+  if (fi && pv) fi.onchange = () => {
+    const f = fi.files && fi.files[0];
+    if (!f) { pv.classList.add('hidden'); pv.removeAttribute('src'); return; }
+    pv.src = URL.createObjectURL(f); pv.classList.remove('hidden');
+  };
+  finishView($('#works-body'));
+  bindAcc();
+}
+async function saveWork() {
+  const title = ($('#w-title').value || '').trim();
+  const desc = ($('#w-desc').value || '').trim();
+  const fi = $('#w-video');
+  const file = fi && fi.files && fi.files[0];
+  if (!title && !desc && !file) { toast('写点什么，或选一个视频吧'); return; }
+  const id = 'wk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+  const work = { id, title: title || '无标题作品', desc, createdAt: Date.now(), date: today(), hasVideo: !!file };
+  S.works = S.works || []; S.works.unshift(work); save();
+  if (file && typeof indexedDB !== 'undefined') {
+    try { await putWorkVideo(id, file); } catch (e) { work.hasVideo = false; toast('视频保存失败，文字已保存'); }
+  }
+  render(); toast('已保存到「我的作品」');
+}
+async function playWorkVideo(id) {
+  const v = document.querySelector('video.work-video[data-vid="' + id + '"]');
+  if (!v) return;
+  if (v.src) { v.paused ? v.play() : v.pause(); return; }
+  if (typeof indexedDB === 'undefined') { toast('当前环境不支持本地视频回放'); return; }
+  try {
+    const blob = await getWorkVideo(id);
+    if (!blob) { toast('视频不存在或已删除'); return; }
+    v.src = URL.createObjectURL(blob); v.play();
+  } catch (e) { toast('视频读取失败'); }
+}
+async function shareWorkToDouyin(w) {
+  const caption = buildWorkCaption(w);
+  let file = null;
+  if (w.hasVideo && typeof indexedDB !== 'undefined') {
+    try { const blob = await getWorkVideo(w.id); if (blob) file = new File([blob], (w.title || '作品') + '.mp4', { type: blob.type || 'video/mp4' }); } catch (e) {}
+  }
+  if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], text: caption, title: '暖年作品' }); toast('已唤起系统分享，选「抖音」即可发布'); return; }
+    catch (e) { if (e && e.name === 'AbortError') return; }
+  }
+  try { await navigator.clipboard.writeText(caption); toast('已复制文案，正在打开抖音，去粘贴发布～'); }
+  catch (e) { toast('请长按复制以下文案后在抖音发布：\n' + caption, 5200); }
+  openDouyinSearch(w.title || '日常记录');
+}
+function delWork(id) {
+  if (!confirm('确定删除这件作品？视频也会从本机移除。')) return;
+  S.works = (S.works || []).filter(x => x.id !== id); save();
+  if (typeof indexedDB !== 'undefined') delWorkVideo(id).catch(() => {});
+  render(); toast('已删除');
+}
+
 /* ================= 渲染 ================= */
 function render() {
   if (currentView === 'home') renderHome();
   if (currentView === 'diet') renderDiet();
   if (currentView === 'move') renderMove();
   if (currentView === 'me') renderMe();
+  if (currentView === 'works') renderWorks();
   applyFont();
 }
 function applyFont() { document.documentElement.style.fontSize = [16, 19, 22][S.settings.font || 0] + 'px'; }
